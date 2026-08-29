@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: invoicesystem-backend-app
+    restart: unless-stopped
+    ports:
+      - "8002:80"
+    # TIDAK ada bind mount source code di production
+    # Kalau butuh persist storage upload user, mount HANYA folder itu:
+    volumes:
+      - invoicesystem-storage:/var/www/html/storage/app
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    networks:
+      - invoicesystem-network
+    depends_on:
+      - mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: invoicesystem-frontend-app
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    networks:
+      - invoicesystem-network
+    depends_on:
+      - backend
+
+  mysql:
+    image: mysql:8.0
+    container_name: invoicesystem-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: invoicesystem_db
+      MYSQL_USER: invoicesystem_user
+      MYSQL_PASSWORD: invoicesystem_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3309:3306"
+    volumes:
+      - invoicesystem-mysql-data:/var/lib/mysql
+    networks:
+      - invoicesystem-network
+
+networks:
+  invoicesystem-network:
+    driver: bridge
+
+volumes:
+  invoicesystem-mysql-data:
+    driver: local
+  invoicesystem-storage:
+    driver: local
