@@ -46,6 +46,11 @@ export function UserProfileMenu() {
         ...profile,
         name: user.name,
         email: user.email,
+        role: typeof user.role === 'string' && user.role ? user.role : profile.role,
+        department:
+        typeof user.department === 'string' && user.department
+          ? user.department
+          : profile.department,
       });
       syncedRef.current = true;
     }

@@ -2,20 +2,8 @@ import { createContext, useContext, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { authApi } from '../lib/api';
+import type { AuthUser, AuthContextValue } from '../types'
 
-interface AuthUser {
-  id: number;
-  name: string;
-  email: string;
-  [key: string]: unknown;
-}
-
-interface AuthContextValue {
-  user: AuthUser | null | undefined;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
-  logout: () => Promise<void>;
-}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
