@@ -180,12 +180,12 @@ function CompanyModal({ company, onClose }: { company?: Company; onClose: () => 
               <div className="md:col-span-2 space-y-3">
                 <div>
                   <label className={lbl}>Nama Resmi Perusahaan <span className="text-rose-500">*</span></label>
-                  <input {...register('name')} required placeholder="PT Solusi Digital Nusantara" className={inp} />
+                  <input {...register('name')} required placeholder="Moracraft Studio" className={inp} />
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
                     <label className={lbl}>Email Penagihan</label>
-                    <input {...register('email')} type="email" placeholder="billing@perusahaan.com" className={inp} />
+                    <input {...register('email')} type="email" placeholder="studiomoracraft@gmail.com" className={inp} />
                   </div>
                   <div>
                     <label className={lbl}>Nomor Telepon</label>
@@ -217,17 +217,17 @@ function CompanyModal({ company, onClose }: { company?: Company; onClose: () => 
 
             <div>
               <label className={lbl}>Alamat Lengkap Kantor</label>
-              <textarea {...register('address')} rows={2} placeholder="Gedung Cyber 2 Tower Lt. 18, Jl. Rasuna Said" className={inp + ' resize-none'} />
+              <textarea {...register('address')} rows={2} placeholder="Gamping, Sleman, Yogyakarta" className={inp + ' resize-none'} />
             </div>
 
             <div className="grid grid-cols-3 gap-2.5">
               <div>
                 <label className={lbl}>Kota</label>
-                <input {...register('city')} placeholder="Jakarta Selatan" className={inp} />
+                <input {...register('city')} placeholder="Sleman" className={inp} />
               </div>
               <div>
                 <label className={lbl}>Provinsi</label>
-                <input {...register('state')} placeholder="DKI Jakarta" className={inp} />
+                <input {...register('state')} placeholder="Daerah Istimewa Yogyakarta" className={inp} />
               </div>
               <div>
                 <label className={lbl}>Kode Pos</label>
@@ -264,11 +264,11 @@ function CompanyModal({ company, onClose }: { company?: Company; onClose: () => 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className={lbl}>Nama Penanda Tangan (PIC)</label>
-                <input {...register('signer_name')} placeholder="Dr. Hendra Wijaya, M.Kom" className={inp} />
+                <input {...register('signer_name')} placeholder="Bimo Satrio Putra Pradana, S.Kom" className={inp} />
               </div>
               <div>
                 <label className={lbl}>Jabatan PIC</label>
-                <input {...register('signer_title')} placeholder="Direktur Utama / Finance Head" className={inp} />
+                <input {...register('signer_title')} placeholder="Founder & Software Engineer" className={inp} />
               </div>
             </div>
 
@@ -306,13 +306,13 @@ function CompanyModal({ company, onClose }: { company?: Company; onClose: () => 
               </div>
               <div>
                 <label className={lbl}>Nomor Rekening</label>
-                <input {...register('bank_account_number')} placeholder="1270009876543" className={inp} />
+                <input {...register('bank_account_number')} placeholder="23504472621" className={inp} />
               </div>
             </div>
 
             <div>
               <label className={lbl}>Nama Pemilik Rekening (A/N)</label>
-              <input {...register('bank_account_name')} placeholder="PT Solusi Digital Nusantara" className={inp} />
+              <input {...register('bank_account_name')} placeholder="Moracraft Studio" className={inp} />
             </div>
           </div>
 
