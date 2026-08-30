@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Printer, Download, Send, CheckCircle } from 'lucide-react';
+import { Printer, Download, Send, CheckCircle, MessageCircle } from 'lucide-react';
 import type { Invoice, InvoiceStatus } from '../types';
 import { PreviewMinimalis } from './PreviewMinimalis';
 import { PreviewFormal } from './PreviewFormal';
 import { PreviewGradient } from './PreviewGradient';
 import { type Template, templateMeta, getTemplateStyles } from './invoiceTemplateStyles';
 import { terbilang } from '../lib/terbilang';
+import { WhatsAppShareModal } from './WhatsAppShareModal';
 
 interface Props {
   invoice: Invoice;
@@ -21,6 +22,7 @@ const STATUS_MAP: Record<InvoiceStatus, { label: string; dot: string; text: stri
 
 export function InvoicePreview({ invoice, onStatusChange }: Props) {
   const [template, setTemplate] = useState<Template>('minimalis');
+  const [waModalOpen, setWaModalOpen] = useState(false);
 
   const formatRupiah = (n: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -252,6 +254,15 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
           )}
 
           <button
+            onClick={() => setWaModalOpen(true)}
+            className="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-3 py-2 rounded-lg transition-colors shadow-xs cursor-pointer"
+            title="Kirim Ringkasan Faktur via WhatsApp (1-Klik)"
+          >
+            <MessageCircle size={14} className="stroke-[2.5]" />
+            <span>Kirim WA</span>
+          </button>
+
+          <button
             onClick={handlePrint}
             className="inline-flex items-center gap-1.5 text-xs font-semibold border border-zinc-300 hover:border-zinc-400 bg-white hover:bg-zinc-50 text-zinc-800 px-3 py-2 rounded-lg transition-colors shadow-xs"
           >
@@ -272,6 +283,13 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
         {template === 'formal'    && <PreviewFormal    {...previewProps} />}
         {template === 'gradient'  && <PreviewGradient  {...previewProps} />}
       </div>
+
+      {/* ── WhatsApp 1-Click Share Modal ── */}
+      <WhatsAppShareModal
+        invoice={invoice}
+        isOpen={waModalOpen}
+        onClose={() => setWaModalOpen(false)}
+      />
     </div>
   );
 }

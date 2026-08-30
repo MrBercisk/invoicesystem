@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -7,16 +8,19 @@ import {
   Send, 
   CheckCircle2, 
   Building2,
-  Users
+  Users,
+  MessageCircle
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
 import { InvoicePreview } from '../components/InvoicePreview';
+import { WhatsAppShareModal } from '../components/WhatsAppShareModal';
 import type { InvoiceStatus } from '../types';
 
 export function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [waModalOpen, setWaModalOpen] = useState(false);
 
   const { data: invoice, isLoading, error } = useQuery({
     queryKey: ['invoice', id],
@@ -102,6 +106,14 @@ export function InvoiceDetailPage() {
             </button>
           )}
 
+          <button
+            onClick={() => setWaModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg transition-colors shadow-xs cursor-pointer"
+            title="Kirim Ringkasan Faktur via WhatsApp (1-Klik)"
+          >
+            <MessageCircle size={13} className="stroke-[2.5]" /> Kirim WA
+          </button>
+
           <Link
             to={`/invoices/${invoice.id}/edit`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-950 transition-colors shadow-xs"
@@ -127,6 +139,13 @@ export function InvoiceDetailPage() {
       <InvoicePreview
         invoice={invoice}
         onStatusChange={(status) => statusMutation.mutate({ status })}
+      />
+
+      {/* ── WhatsApp 1-Click Share Modal ── */}
+      <WhatsAppShareModal
+        invoice={invoice}
+        isOpen={waModalOpen}
+        onClose={() => setWaModalOpen(false)}
       />
     </div>
   );

@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
-  Building2, 
-  FileText, 
   Settings, 
   LogOut, 
   ShieldCheck, 
@@ -20,7 +17,6 @@ import { useUserProfile, DEFAULT_USER_PROFILE } from '../lib/userProfile';
 
 export function UserProfileMenu() {
   const { profile, update } = useUserProfile();
-  const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [logoutFeedback, setLogoutFeedback] = useState(false);

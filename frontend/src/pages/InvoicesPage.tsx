@@ -10,11 +10,13 @@ import {
   Building2, 
   FileText, 
   X,
-  Printer
+  Printer,
+  MessageCircle
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
 import { formatRupiah, formatDate } from '../lib/terbilang';
 import { InvoicePreview } from '../components/InvoicePreview';
+import { WhatsAppShareModal } from '../components/WhatsAppShareModal';
 import type { Invoice, InvoiceStatus } from '../types';
 
 export function InvoicesPage() {
@@ -22,6 +24,7 @@ export function InvoicesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+  const [waInvoice, setWaInvoice] = useState<Invoice | null>(null);
 
   const { data: invoicesData, isLoading } = useQuery({
     queryKey: ['invoices', statusFilter, searchTerm],
@@ -193,6 +196,13 @@ export function InvoicesPage() {
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          onClick={() => setWaInvoice(invoice)}
+                          className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition-colors"
+                          title="Kirim via WhatsApp (1-Klik)"
+                        >
+                          <MessageCircle size={15} />
+                        </button>
+                        <button
                           onClick={() => setPreviewInvoice(invoice)}
                           className="p-1.5 text-slate-600 hover:text-slate-950 hover:bg-slate-100 rounded-md transition-colors"
                           title="Pratinjau Cepat"
@@ -260,6 +270,15 @@ export function InvoicesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── WhatsApp 1-Click Share Modal ── */}
+      {waInvoice && (
+        <WhatsAppShareModal
+          invoice={waInvoice}
+          isOpen={Boolean(waInvoice)}
+          onClose={() => setWaInvoice(null)}
+        />
       )}
     </div>
   );
