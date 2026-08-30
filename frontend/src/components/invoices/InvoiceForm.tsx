@@ -2,7 +2,7 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Trash2, Plus } from 'lucide-react';
-import type { Company, Client, Product, Invoice } from '../types';
+import type { Company, Client, Product, Invoice } from '../../types';
 
 const itemSchema = z.object({
   product_id: z.number().optional(),

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
 import { formatRupiah, formatDate } from '../lib/terbilang';
-import { InvoicePreview } from '../components/InvoicePreview';
+import { InvoicePreview } from '../components/invoices/InvoicePreview';
 import { WhatsAppShareModal } from '../components/WhatsAppShareModal';
 import type { Invoice, InvoiceStatus } from '../types';
 

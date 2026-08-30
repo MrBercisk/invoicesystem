@@ -1,5 +1,5 @@
-import type { Invoice } from '../types';
-import { terbilang } from '../lib/terbilang';
+import type { Invoice } from '../../types';
+import { terbilang } from '../../lib/terbilang';
 
 interface Props {
   invoice: Invoice;
@@ -180,11 +180,11 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
 
             <div className="border-b-2 border-zinc-950 pt-1 pb-1">
               <span className="font-bold text-zinc-950 text-xs">
-                {invoice.company.signer_name || invoice.company.name}
+                {invoice.company.signature_name || invoice.company.name}
               </span>
             </div>
             <div className="text-[10px] text-zinc-500 mt-1">
-              {invoice.company.signer_title || 'Penanggung Jawab'}
+              {invoice.company.signature_title || 'Penanggung Jawab'}
             </div>
           </div>
         </div>

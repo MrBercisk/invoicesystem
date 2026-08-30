@@ -12,7 +12,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
-import { InvoicePreview } from '../components/InvoicePreview';
+import { InvoicePreview } from '../components/invoices/InvoicePreview';
 import { WhatsAppShareModal } from '../components/WhatsAppShareModal';
 import type { InvoiceStatus } from '../types';
 

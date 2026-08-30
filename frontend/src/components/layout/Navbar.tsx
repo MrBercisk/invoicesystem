@@ -14,8 +14,8 @@ import {
   Command,
   Sparkles
 } from 'lucide-react';
-import { invoicesApi, clientsApi, productsApi } from '../lib/api';
-import { UserProfileMenu } from './UserProfileMenu';
+import { invoicesApi, clientsApi, productsApi } from '../../lib/api';
+import { UserProfileMenu } from '../UserProfileMenu';
 
 interface ModernNavbarProps {
   onOpenMobileMenu?: () => void;

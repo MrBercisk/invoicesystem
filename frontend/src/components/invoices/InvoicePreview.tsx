@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Printer, Download, Send, CheckCircle, MessageCircle } from 'lucide-react';
-import type { Invoice, InvoiceStatus } from '../types';
+import type { Invoice, InvoiceStatus } from '../../types';
 import { PreviewMinimalis } from './PreviewMinimalis';
 import { PreviewFormal } from './PreviewFormal';
 import { PreviewGradient } from './PreviewGradient';
 import { type Template, templateMeta, getTemplateStyles } from './invoiceTemplateStyles';
-import { terbilang } from '../lib/terbilang';
-import { WhatsAppShareModal } from './WhatsAppShareModal';
+import { terbilang } from '../../lib/terbilang';
+import { WhatsAppShareModal } from '../WhatsAppShareModal';
 
 interface Props {
   invoice: Invoice;
@@ -47,8 +47,8 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
             ${invoice.company.signature ? `<img src="${invoice.company.signature}" class="signature-img" alt="Tanda Tangan" />` : ''}
           </div>
           <div class="signature-line"></div>
-          <div class="signer-name">${invoice.company.signer_name || invoice.company.name}</div>
-          <div class="signer-title">${invoice.company.signer_title || 'Penanggung Jawab'}</div>
+          <div class="signer-name">${invoice.company.signature_name || invoice.company.name}</div>
+          <div class="signer-title">${invoice.company.signature_title || 'Penanggung Jawab'}</div>
         </div>
       </div>
     `;

@@ -21,11 +21,13 @@ export type InvoiceStatus =
 export interface Invoice {
   id: number;
   invoice_number: string;
+
   company_id: number;
   client_id: number;
 
   company: Company;
   client: Client;
+
   items: InvoiceItem[];
 
   invoice_date: string;
