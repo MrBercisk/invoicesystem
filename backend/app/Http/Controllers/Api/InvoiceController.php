@@ -1,16 +1,24 @@
 <?php
+
 namespace App\Http\Controllers\Api;
- 
+
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Invoice\StoreInvoiceRequest;
+use App\Http\Requests\Invoice\UpdateInvoiceRequest;
+use App\Http\Requests\Invoice\UpdateInvoiceStatusRequest;
+use App\Http\Responses\ApiResponse;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
- 
-class InvoiceController extends Controller {
-    public function index(Request $request): JsonResponse {
+use Illuminate\Database\QueryException;
+
+class InvoiceController extends Controller
+{
+    public function index(Request $request): JsonResponse
+    {
         $query = Invoice::with(['company', 'client', 'items'])
                         ->latest();
- 
+
         if ($request->status) {
             $query->where('status', $request->status);
         }
@@ -20,29 +28,14 @@ class InvoiceController extends Controller {
         if ($request->search) {
             $query->where('invoice_number', 'like', "%{$request->search}%");
         }
- 
-        return response()->json($query->paginate(15));
+
+        return ApiResponse::success($query->paginate(15));
     }
- 
-    public function store(Request $request): JsonResponse {
-        $data = $request->validate([
-            'company_id'   => 'required|exists:companies,id',
-            'client_id'    => 'required|exists:clients,id',
-            'invoice_date' => 'required|date',
-            'due_date'     => 'required|date|after_or_equal:invoice_date',
-            'tax_rate'     => 'nullable|numeric|min:0|max:100',
-            'discount'     => 'nullable|numeric|min:0',
-            'notes'        => 'nullable|string',
-            'terms'        => 'nullable|string',
-            'items'        => 'required|array|min:1',
-            'items.*.name'     => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.price'    => 'required|numeric|min:0',
-            'items.*.unit'     => 'nullable|string',
-            'items.*.description' => 'nullable|string',
-            'items.*.product_id'  => 'nullable|exists:products,id',
-        ]);
- 
+
+    public function store(StoreInvoiceRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
         $invoice = Invoice::create([
             ...$data,
             'invoice_number' => Invoice::generateNumber(),
@@ -51,43 +44,28 @@ class InvoiceController extends Controller {
             'tax_amount'     => 0,
             'total'          => 0,
         ]);
- 
+
         foreach ($data['items'] as $item) {
             $itemTotal = $item['quantity'] * $item['price'];
             $invoice->items()->create([...$item, 'total' => $itemTotal]);
         }
- 
+
         $invoice->recalculate();
- 
-        return response()->json($invoice->load(['company', 'client', 'items']), 201);
+
+        return ApiResponse::created($invoice->load(['company', 'client', 'items']));
     }
- 
-    public function show(Invoice $invoice): JsonResponse {
-        return response()->json($invoice->load(['company', 'client', 'items.product']));
+
+    public function show(Invoice $invoice): JsonResponse
+    {
+        return ApiResponse::success($invoice->load(['company', 'client', 'items.product']));
     }
- 
-    public function update(Request $request, Invoice $invoice): JsonResponse {
-        $data = $request->validate([
-            'company_id'   => 'sometimes|exists:companies,id',
-            'client_id'    => 'sometimes|exists:clients,id',
-            'invoice_date' => 'sometimes|date',
-            'due_date'     => 'sometimes|date',
-            'status'       => 'sometimes|in:draft,sent,paid,cancelled',
-            'tax_rate'     => 'nullable|numeric',
-            'discount'     => 'nullable|numeric|min:0',
-            'notes'        => 'nullable|string',
-            'terms'        => 'nullable|string',
-            'items'        => 'sometimes|array|min:1',
-            'items.*.name'     => 'required_with:items|string',
-            'items.*.quantity' => 'required_with:items|numeric|min:0.01',
-            'items.*.price'    => 'required_with:items|numeric|min:0',
-            'items.*.unit'     => 'nullable|string',
-            'items.*.description' => 'nullable|string',
-            'items.*.product_id'  => 'nullable|exists:products,id',
-        ]);
- 
+
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice): JsonResponse
+    {
+        $data = $request->validated();
+
         $invoice->update($data);
- 
+
         if (isset($data['items'])) {
             $invoice->items()->delete();
             foreach ($data['items'] as $item) {
@@ -96,18 +74,25 @@ class InvoiceController extends Controller {
             }
             $invoice->recalculate();
         }
- 
-        return response()->json($invoice->load(['company', 'client', 'items']));
+
+        return ApiResponse::success($invoice->load(['company', 'client', 'items']));
     }
- 
-    public function destroy(Invoice $invoice): JsonResponse {
-        $invoice->delete();
-        return response()->json(['message' => 'Deleted successfully']);
+
+    public function destroy(Invoice $invoice): JsonResponse
+    {
+        try {
+            $invoice->delete();
+
+            return ApiResponse::message('Deleted successfully');
+        } catch (QueryException $e) {
+            return ApiResponse::error('Invoice tidak bisa dihapus karena masih memiliki data terkait.');
+        }
     }
- 
-    public function updateStatus(Request $request, Invoice $invoice): JsonResponse {
-        $request->validate(['status' => 'required|in:draft,sent,paid,cancelled']);
-        $invoice->update(['status' => $request->status]);
-        return response()->json($invoice);
+
+    public function updateStatus(UpdateInvoiceStatusRequest $request, Invoice $invoice): JsonResponse
+    {
+        $invoice->update(['status' => $request->validated('status')]);
+
+        return ApiResponse::success($invoice);
     }
 }

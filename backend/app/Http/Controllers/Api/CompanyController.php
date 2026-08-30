@@ -1,61 +1,49 @@
 <?php
+
 namespace App\Http\Controllers\Api;
- 
+
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Company\StoreCompanyRequest;
+use App\Http\Requests\Company\UpdateCompanyRequest;
+use App\Http\Responses\ApiResponse;
 use App\Models\Company;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
- 
-class CompanyController extends Controller {
-    public function index(): JsonResponse {
-        return response()->json(Company::latest()->get());
+use Illuminate\Database\QueryException;
+
+class CompanyController extends Controller
+{
+    public function index(): JsonResponse
+    {
+        return ApiResponse::success(Company::latest()->get());
     }
- 
-    public function store(Request $request): JsonResponse {
-        $data = $request->validate([
-            'name'                => 'required|string|max:255',
-            'email'               => 'nullable|email',
-            'phone'               => 'nullable|string',
-            'address'             => 'nullable|string',
-            'city'                => 'nullable|string',
-            'state'               => 'nullable|string',
-            'postal_code'         => 'nullable|string',
-            'country'             => 'nullable|string',
-            'npwp'                => 'nullable|string',
-            'website'             => 'nullable|string',
-            'bank_name'           => 'nullable|string',
-            'bank_account_name'   => 'nullable|string',
-            'bank_account_number' => 'nullable|string',
-        ]);
-        $company = Company::create($data);
-        return response()->json($company, 201);
+
+    public function store(StoreCompanyRequest $request): JsonResponse
+    {
+        $company = Company::create($request->validated());
+
+        return ApiResponse::created($company);
     }
- 
-    public function show(Company $company): JsonResponse {
-        return response()->json($company);
+
+    public function show(Company $company): JsonResponse
+    {
+        return ApiResponse::success($company);
     }
- 
-    public function update(Request $request, Company $company): JsonResponse {
-        $data = $request->validate([
-            'name'                => 'sometimes|required|string|max:255',
-            'email'               => 'nullable|email',
-            'phone'               => 'nullable|string',
-            'address'             => 'nullable|string',
-            'city'                => 'nullable|string',
-            'state'               => 'nullable|string',
-            'postal_code'         => 'nullable|string',
-            'country'             => 'nullable|string',
-            'npwp'                => 'nullable|string',
-            'bank_name'           => 'nullable|string',
-            'bank_account_name'   => 'nullable|string',
-            'bank_account_number' => 'nullable|string',
-        ]);
-        $company->update($data);
-        return response()->json($company);
+
+    public function update(UpdateCompanyRequest $request, Company $company): JsonResponse
+    {
+        $company->update($request->validated());
+
+        return ApiResponse::success($company);
     }
- 
-    public function destroy(Company $company): JsonResponse {
-        $company->delete();
-        return response()->json(['message' => 'Deleted successfully']);
+
+    public function destroy(Company $company): JsonResponse
+    {
+        try {
+            $company->delete();
+
+            return ApiResponse::message('Deleted successfully');
+        } catch (QueryException $e) {
+            return ApiResponse::error('Perusahaan tidak bisa dihapus karena masih memiliki data terkait.');
+        }
     }
 }

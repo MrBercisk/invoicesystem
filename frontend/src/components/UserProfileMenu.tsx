@@ -1,25 +1,31 @@
 import { useState, useRef, useEffect } from 'react';
-import { 
-  Settings, 
-  LogOut, 
-  ShieldCheck, 
-  ChevronDown, 
-  Check, 
-  User, 
-  Mail, 
-  Phone, 
+import { useNavigate } from 'react-router-dom';
+import {
+  Settings,
+  LogOut,
+  ShieldCheck,
+  ChevronDown,
+  Check,
+  User,
+  Mail,
+  Phone,
   Briefcase,
   X,
   Sparkles,
-  Camera
+  Camera,
 } from 'lucide-react';
 import { useUserProfile, DEFAULT_USER_PROFILE } from '../lib/userProfile';
+import { useAuth } from '../context/AuthContext';
 
 export function UserProfileMenu() {
   const { profile, update } = useUserProfile();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [logoutFeedback, setLogoutFeedback] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   // Edit form state
   const [formName, setFormName] = useState(profile.name);
@@ -30,6 +36,20 @@ export function UserProfileMenu() {
   const [formAvatarUrl, setFormAvatarUrl] = useState(profile.avatarUrl || '');
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const syncedRef = useRef(false);
+
+  // Sinkronkan nama & email dengan user yang benar-benar login (Sanctum),
+  // hanya sekali dan hanya kalau profil lokal belum pernah dikustomisasi.
+  useEffect(() => {
+    if (user && !syncedRef.current && profile.email === DEFAULT_USER_PROFILE.email) {
+      update({
+        ...profile,
+        name: user.name,
+        email: user.email,
+      });
+      syncedRef.current = true;
+    }
+  }, [user]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -67,14 +87,17 @@ export function UserProfileMenu() {
     setEditModalOpen(false);
   };
 
-  const handleLogout = () => {
-    setLogoutFeedback(true);
+  const handleLogout = async () => {
     setDropdownOpen(false);
-    setTimeout(() => {
-      setLogoutFeedback(false);
-      // Reset or simulate refresh
-      update(DEFAULT_USER_PROFILE);
-    }, 1200);
+    setLoggingOut(true);
+    setLogoutFeedback(true);
+
+    try {
+      await logout();
+    } finally {
+      setLoggingOut(false);
+      navigate('/login', { replace: true });
+    }
   };
 
   // Get initials for avatar
@@ -110,8 +133,8 @@ export function UserProfileMenu() {
             </div>
           )}
           {/* Online green indicator badge with subtle red border */}
-          <span 
-            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" 
+          <span
+            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"
             title="Sesi Aktif"
           />
         </div>
@@ -126,11 +149,11 @@ export function UserProfileMenu() {
           </span>
         </div>
 
-        <ChevronDown 
-          size={14} 
+        <ChevronDown
+          size={14}
           className={`text-zinc-400 group-hover:text-zinc-700 transition-transform duration-200 hidden sm:block ${
             dropdownOpen ? 'rotate-180 text-red-600' : ''
-          }`} 
+          }`}
         />
       </button>
 
@@ -182,26 +205,12 @@ export function UserProfileMenu() {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-left font-semibold cursor-pointer"
+              disabled={loggingOut}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-left font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <LogOut size={15} />
-              <span>Ganti Akun / Keluar Sesi</span>
+              <span>{loggingOut ? 'Mengakhiri sesi…' : 'Keluar dari Akun'}</span>
             </button>
-          </div>
-
-          {/* Status footer */}
-          <div className="px-4 py-2.5 bg-zinc-50 border-t border-zinc-100 text-[10px] text-zinc-500 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-zinc-600">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Terhubung ke Sistem
-              </span>
-              <span className="font-mono text-zinc-400 font-medium">v1.2.0</span>
-            </div>
-            <div className="text-[9px] text-zinc-400 font-mono flex items-center justify-between border-t border-zinc-200/60 pt-1">
-              <span>By Bims Software Engineer</span>
-              <span className="text-red-600 font-bold">●</span>
-            </div>
           </div>
         </div>
       )}
@@ -209,7 +218,7 @@ export function UserProfileMenu() {
       {/* ── Edit Profile Modal ── */}
       {editModalOpen && (
         <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div 
+          <div
             className="bg-white border border-zinc-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
@@ -380,11 +389,11 @@ export function UserProfileMenu() {
         </div>
       )}
 
-      {/* ── Toast notification feedback on session change ── */}
+      {/* ── Toast notification feedback on logout ── */}
       {logoutFeedback && (
         <div className="fixed bottom-6 right-6 z-50 bg-zinc-950 text-white px-4 py-3 rounded-xl shadow-2xl border border-zinc-800 flex items-center gap-2.5 text-xs font-semibold animate-in fade-in slide-in-from-bottom-3 duration-200">
           <Sparkles size={16} className="text-red-500 animate-spin" />
-          <span>Sesi pengguna berhasil diperbarui!</span>
+          <span>Mengakhiri sesi, mengalihkan ke halaman login…</span>
         </div>
       )}
     </div>

@@ -21,7 +21,7 @@ interface ModernNavbarProps {
   onOpenMobileMenu?: () => void;
 }
 
-export function ModernNavbar({ onOpenMobileMenu }: ModernNavbarProps) {
+export function Navbar({ onOpenMobileMenu }: ModernNavbarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState('');

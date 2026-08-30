@@ -16,7 +16,7 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   name: 'Bims Engineer',
   email: 'engineer@gmail.com',
   role: 'Software Engineer',
-  department: 'IT',
+  department: 'IT Department',
   phone: '+62 812-3456-7890',
   avatarBg: 'bg-zinc-950 text-white',
 };
