@@ -1,26 +1,26 @@
 import { useState } from 'react';
-import { Printer, Download, Send, CheckCircle, LayoutTemplate, ChevronDown } from 'lucide-react';
+import { Printer, Download, Send, CheckCircle } from 'lucide-react';
 import type { Invoice, InvoiceStatus } from '../types';
 import { PreviewMinimalis } from './PreviewMinimalis';
 import { PreviewFormal } from './PreviewFormal';
 import { PreviewGradient } from './PreviewGradient';
 import { type Template, templateMeta, getTemplateStyles } from './invoiceTemplateStyles';
+import { terbilang } from '../lib/terbilang';
 
 interface Props {
   invoice: Invoice;
   onStatusChange?: (status: InvoiceStatus) => void;
 }
 
-const STATUS_MAP: Record<InvoiceStatus, { label: string; dot: string; text: string }> = {
-  draft:     { label: 'Draft',      dot: 'bg-zinc-400',    text: 'text-zinc-500' },
-  sent:      { label: 'Terkirim',   dot: 'bg-sky-400',     text: 'text-sky-600' },
-  paid:      { label: 'Lunas',      dot: 'bg-emerald-400', text: 'text-emerald-600' },
-  cancelled: { label: 'Batal',      dot: 'bg-rose-400',    text: 'text-rose-500' },
+const STATUS_MAP: Record<InvoiceStatus, { label: string; dot: string; text: string; bg: string }> = {
+  draft:     { label: 'Draft',      dot: 'bg-zinc-400',    text: 'text-zinc-700', bg: 'bg-zinc-100 border-zinc-200' },
+  sent:      { label: 'Terkirim',   dot: 'bg-zinc-900',    text: 'text-zinc-900', bg: 'bg-zinc-100 border-zinc-300' },
+  paid:      { label: 'Lunas',      dot: 'bg-emerald-600', text: 'text-emerald-800', bg: 'bg-emerald-50 border-emerald-200' },
+  cancelled: { label: 'Dibatalkan', dot: 'bg-red-600',     text: 'text-red-700',  bg: 'bg-red-50 border-red-200' },
 };
 
 export function InvoicePreview({ invoice, onStatusChange }: Props) {
   const [template, setTemplate] = useState<Template>('minimalis');
-  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
   const formatRupiah = (n: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -33,10 +33,29 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
     const isFormal = t === 'formal';
     const isGradient = t === 'gradient';
 
+    const logoHtml = invoice.company.logo ? `<img src="${invoice.company.logo}" class="company-logo" alt="${invoice.company.name}" />` : '';
+
+    const signatureSectionHtml = `
+      <div class="signature-section">
+        <div class="signature-wrap">
+          <div class="signature-date">${invoice.company.city ? invoice.company.city + ', ' : ''}${formatDate(invoice.invoice_date)}</div>
+          <div class="signature-company">Hormat Kami,</div>
+          <div class="signature-box">
+            ${invoice.company.stamp ? `<img src="${invoice.company.stamp}" class="stamp-img" alt="Stempel Perusahaan" />` : ''}
+            ${invoice.company.signature ? `<img src="${invoice.company.signature}" class="signature-img" alt="Tanda Tangan" />` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div class="signer-name">${invoice.company.signer_name || invoice.company.name}</div>
+          <div class="signer-title">${invoice.company.signer_title || 'Penanggung Jawab'}</div>
+        </div>
+      </div>
+    `;
+
     const headerSection = isGradient ? `
       <div class="header-bg">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
+            ${logoHtml}
             <div class="company-name">${invoice.company.name}</div>
             <div class="company-info">
               ${invoice.company.address ? invoice.company.address + '<br>' : ''}
@@ -47,7 +66,7 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
             </div>
           </div>
           <div>
-            <div class="invoice-title">Invoice</div>
+            <div class="invoice-title">Invoice Penagihan</div>
             <div class="invoice-number">${invoice.invoice_number}</div>
             <div class="invoice-meta">
               <span class="label">Tanggal: </span>${formatDate(invoice.invoice_date)}<br>
@@ -61,6 +80,7 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
       <div class="wrap">
       <div class="header">
         <div>
+          ${logoHtml}
           <div class="company-name">${invoice.company.name}</div>
           <div class="company-info">
             ${invoice.company.address ? invoice.company.address + '<br>' : ''}
@@ -71,7 +91,7 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
           </div>
         </div>
         <div>
-          <div class="invoice-title">INVOICE</div>
+          <div class="invoice-title">${isFormal ? 'FAKTUR' : 'INVOICE'}</div>
           <div class="invoice-number">${invoice.invoice_number}</div>
           <div class="invoice-meta">
             <span class="label">Tanggal: </span>${formatDate(invoice.invoice_date)}<br>
@@ -85,7 +105,16 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
     const closingWrap = `</div>`;
 
     return `
-      <html><head><title>Invoice ${invoice.invoice_number}</title><style>${styles}</style></head>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Invoice ${invoice.invoice_number}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>${styles}</style>
+      </head>
       <body>
       ${headerSection}
         <div class="bill-to">
@@ -117,9 +146,9 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
                   ${item.description ? `<div class="td-note">${item.description}</div>` : ''}
                 </td>
                 <td class="td-right">${item.quantity}</td>
-                <td style="padding-left:6px; color:#9ca3af">${item.unit}</td>
+                <td style="padding-left:6px; color:#a1a1aa">${item.unit}</td>
                 <td class="td-right">${formatRupiah(item.price)}</td>
-                <td class="td-right" style="font-weight:500">${formatRupiah(item.quantity * item.price)}</td>
+                <td class="td-right" style="font-weight:700; color:#09090b">${formatRupiah(item.quantity * item.price)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -132,12 +161,16 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
             <div class="totals-final"><span>Total</span><span ${!isFormal ? 'class="totals-amount"' : ''}>${formatRupiah(invoice.total)}</span></div>
           </div>
         </div>
+        <div style="background:#fafafa; border:1px solid #e4e4e7; border-left:3.5px solid #dc2626; border-radius:4px; padding:10px 14px; margin-bottom:18px; font-size:10.5px; color:#3f3f46;">
+          <span style="font-weight:800; color:#dc2626; text-transform:uppercase; font-size:9px; letter-spacing:1px; display:block; margin-bottom:2px;">Terbilang:</span>
+          <em style="font-family:'Newsreader', serif; font-size:13px; color:#09090b; font-weight:600;"># ${terbilang(invoice.total)} #</em>
+        </div>
         ${invoice.company.bank_name ? `
           <div class="bank-info">
-            <div class="bank-label">Informasi Pembayaran</div>
+            <div class="bank-label">Informasi Rekening Pembayaran</div>
             <div class="bank-row">Bank: <span class="bank-value">${invoice.company.bank_name}</span></div>
-            ${invoice.company.bank_account_name ? `<div class="bank-row">A/N: <span class="bank-value">${invoice.company.bank_account_name}</span></div>` : ''}
-            ${invoice.company.bank_account_number ? `<div class="bank-row">No. Rek: <span class="bank-value" style="font-size:14px">${invoice.company.bank_account_number}</span></div>` : ''}
+            ${invoice.company.bank_account_name && invoice.company.bank_account_name.trim() ? `<div class="bank-row">A/N: <span class="bank-value">${invoice.company.bank_account_name}</span></div>` : ''}
+            ${invoice.company.bank_account_number ? `<div class="bank-row">No. Rek: <span class="bank-value" style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:700;">${invoice.company.bank_account_number}</span></div>` : ''}
           </div>
         ` : ''}
         ${invoice.notes || invoice.terms ? `
@@ -146,13 +179,15 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
             ${invoice.terms ? `<div><div class="notes-title">Syarat & Ketentuan</div><div>${invoice.terms}</div></div>` : ''}
           </div>
         ` : ''}
+        ${signatureSectionHtml}
         <div class="footer">
           Terima kasih atas kepercayaan Anda • ${invoice.company.name}
           ${invoice.company.email ? ' • ' + invoice.company.email : ''}
         </div>
       ${closingWrap}
       <script>window.onload = () => { window.print(); window.close(); }</script>
-      </body></html>
+      </body>
+      </html>
     `;
   };
 
@@ -168,59 +203,41 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* ── Action bar ── */}
-      <div className="bg-white border border-zinc-200 rounded-2xl p-3 sm:p-4 space-y-3">
-
-        {/* Row 1: status + template picker */}
-        <div className="flex items-center justify-between gap-2">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${s.text}`}>
+      {/* ── Toolbar ── */}
+      <div className="bg-white border border-zinc-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+        {/* Left: Status and Template Selector */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md border ${s.bg} ${s.text}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
             {s.label}
           </span>
 
-          {/* Template picker */}
-          <div className="relative">
-            <button
-              onClick={() => setShowTemplatePicker(v => !v)}
-              className="flex items-center gap-1.5 text-xs font-medium border border-zinc-200 px-3 py-1.5 rounded-lg hover:bg-zinc-50 text-zinc-600 transition-colors"
-            >
-              <LayoutTemplate size={13} />
-              <span className="hidden sm:inline">Template:</span>
-              <span className="font-semibold text-zinc-800 capitalize">{template}</span>
-              <ChevronDown size={12} className="text-zinc-400" />
-            </button>
+          <div className="h-4 w-px bg-zinc-200 hidden sm:block" />
 
-            {showTemplatePicker && (
-              <>
-                <div className="fixed inset-0 z-20" onClick={() => setShowTemplatePicker(false)} />
-                <div className="absolute right-0 top-full mt-1.5 bg-white border border-zinc-200 rounded-2xl shadow-xl p-3 z-30 flex gap-2.5 w-64 sm:w-72">
-                  {(Object.entries(templateMeta) as [Template, typeof templateMeta[Template]][]).map(([key, meta]) => (
-                    <button
-                      key={key}
-                      onClick={() => { setTemplate(key); setShowTemplatePicker(false); }}
-                      className={`flex-1 rounded-xl p-2.5 text-left border-2 transition-all ${
-                        template === key
-                          ? 'border-zinc-900 bg-zinc-50'
-                          : 'border-zinc-100 hover:border-zinc-300'
-                      }`}
-                    >
-                      <div className={`h-7 rounded-lg mb-2 ${meta.preview}`} />
-                      <div className="text-[11px] font-semibold text-zinc-800 leading-tight">{meta.label}</div>
-                      <div className="text-[10px] text-zinc-400 mt-0.5 leading-tight">{meta.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+          {/* Template Segmented Control */}
+          <div className="flex items-center bg-zinc-100 p-0.5 rounded-lg border border-zinc-200 text-xs">
+            {(Object.entries(templateMeta) as [Template, typeof templateMeta[Template]][]).map(([key, meta]) => (
+              <button
+                key={key}
+                onClick={() => setTemplate(key)}
+                className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+                  template === key
+                    ? 'bg-zinc-950 text-white shadow-xs'
+                    : 'text-zinc-600 hover:text-zinc-950'
+                }`}
+              >
+                {meta.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Row 2: action buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           {onStatusChange && invoice.status === 'draft' && (
             <button
               onClick={() => onStatusChange('sent')}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-sky-600 text-white px-3 py-2 rounded-xl hover:bg-sky-700 transition-colors flex-1 sm:flex-none justify-center"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-2 rounded-lg transition-colors shadow-xs"
             >
               <Send size={13} /> Tandai Terkirim
             </button>
@@ -228,35 +245,33 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
           {onStatusChange && invoice.status === 'sent' && (
             <button
               onClick={() => onStatusChange('paid')}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-emerald-600 text-white px-3 py-2 rounded-xl hover:bg-emerald-700 transition-colors flex-1 sm:flex-none justify-center"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition-colors shadow-xs"
             >
               <CheckCircle size={13} /> Tandai Lunas
             </button>
           )}
 
-          <div className="flex items-center gap-2 ml-auto">
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 text-xs font-medium border border-zinc-200 px-3 py-2 rounded-xl hover:bg-zinc-50 text-zinc-600 transition-colors"
-            >
-              <Printer size={13} />
-              <span>Print</span>
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-zinc-900 text-white px-3 py-2 rounded-xl hover:bg-zinc-700 transition-colors"
-            >
-              <Download size={13} />
-              <span>PDF</span>
-            </button>
-          </div>
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold border border-zinc-300 hover:border-zinc-400 bg-white hover:bg-zinc-50 text-zinc-800 px-3 py-2 rounded-lg transition-colors shadow-xs"
+          >
+            <Printer size={14} /> Cetak
+          </button>
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-3.5 py-2 rounded-lg transition-colors shadow-xs"
+          >
+            <Download size={14} /> Simpan PDF
+          </button>
         </div>
       </div>
 
-      {/* Invoice Preview */}
-      {template === 'minimalis' && <PreviewMinimalis {...previewProps} />}
-      {template === 'formal'    && <PreviewFormal    {...previewProps} />}
-      {template === 'gradient'  && <PreviewGradient  {...previewProps} />}
+      {/* ── Active Invoice Template Canvas ── */}
+      <div className="bg-zinc-100/80 p-4 sm:p-8 rounded-2xl border border-zinc-200 overflow-x-auto">
+        {template === 'minimalis' && <PreviewMinimalis {...previewProps} />}
+        {template === 'formal'    && <PreviewFormal    {...previewProps} />}
+        {template === 'gradient'  && <PreviewGradient  {...previewProps} />}
+      </div>
     </div>
   );
 }

@@ -10,6 +10,10 @@ export interface Company {
   country?: string;
   npwp?: string;
   logo?: string;
+  signature?: string;
+  stamp?: string;
+  signer_name?: string;
+  signer_title?: string;
   website?: string;
   bank_name?: string;
   bank_account_name?: string;
