@@ -12,12 +12,20 @@ export interface InvoiceFormItem {
 export interface InvoiceFormData {
   company_id: number;
   client_id: number;
+
   invoice_date: string;
   due_date: string;
+
   status: InvoiceStatus;
+
   tax_rate: number;
   discount: number;
+
   notes?: string;
   terms?: string;
+
+  project_code?: string;
+  installment_label?: string;
+
   items: InvoiceFormItem[];
 }

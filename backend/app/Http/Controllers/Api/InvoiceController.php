@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Str;
 
 class InvoiceController extends Controller
 {
@@ -26,9 +27,17 @@ class InvoiceController extends Controller
             $query->where('client_id', $request->client_id);
         }
         if ($request->search) {
-            $query->where('invoice_number', 'like', "%{$request->search}%");
-        }
+            $search = $request->search;
 
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($clientQuery) use ($search) {
+                        $clientQuery->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhere('project_code', 'like', "%{$search}%")
+                    ->orWhere('installment_label', 'like', "%{$search}%");
+            });
+        }
         return ApiResponse::success($query->paginate(15));
     }
 
@@ -36,9 +45,32 @@ class InvoiceController extends Controller
     {
         $data = $request->validated();
 
+        // Project baru jika invoice memiliki installment label
+        // tetapi belum memiliki project code, generate otomatis.
+        // Jika project code sudah ada, gunakan kode tersebut.
+        if (
+            !empty($data['installment_label']) &&
+            empty($data['project_code'])
+        ) {
+            do {
+                $projectCode =
+                    'PRJ-' .
+                    now()->format('Ymd') .
+                    '-' .
+                    strtoupper(Str::random(4));
+            } while (
+                Invoice::where(
+                    'project_code',
+                    $projectCode
+                )->exists()
+            );
+
+            $data['project_code'] = $projectCode;
+        }
+
         $invoice = Invoice::create([
             ...$data,
-            'invoice_number' => Invoice::generateNumber(),
+            'invoice_number' => Invoice::generateNumber($data['company_id']),
             'status'         => 'draft',
             'subtotal'       => 0,
             'tax_amount'     => 0,
@@ -47,12 +79,18 @@ class InvoiceController extends Controller
 
         foreach ($data['items'] as $item) {
             $itemTotal = $item['quantity'] * $item['price'];
-            $invoice->items()->create([...$item, 'total' => $itemTotal]);
+
+            $invoice->items()->create([
+                ...$item,
+                'total' => $itemTotal,
+            ]);
         }
 
         $invoice->recalculate();
 
-        return ApiResponse::created($invoice->load(['company', 'client', 'items']));
+        return ApiResponse::created(
+            $invoice->load(['company', 'client', 'items'])
+        );
     }
 
     public function show(Invoice $invoice): JsonResponse
@@ -94,5 +132,70 @@ class InvoiceController extends Controller
         $invoice->update(['status' => $request->validated('status')]);
 
         return ApiResponse::success($invoice);
+    }
+    public function projects(Request $request): JsonResponse
+    {
+        $request->validate([
+            'company_id' => ['required', 'integer', 'exists:companies,id'],
+            'client_id' => ['required', 'integer', 'exists:clients,id'],
+        ]);
+
+        $projects = Invoice::query()
+            ->where('company_id', $request->integer('company_id'))
+            ->where('client_id', $request->integer('client_id'))
+            ->whereNotNull('project_code')
+            ->where('project_code', '!=', '')
+            ->select([
+                'id',
+                'invoice_number',
+                'project_code',
+                'installment_label',
+                'client_id',
+                'company_id',
+                'invoice_date',
+                'status',
+                'total',
+            ])
+            ->orderBy('invoice_date')
+            ->get()
+            ->groupBy('project_code')
+            ->map(function ($invoices, $projectCode) {
+                $projectTotal = $invoices->sum(
+                    fn ($invoice) => (float) $invoice->total
+                );
+
+                $paidTotal = $invoices
+                    ->where('status', 'paid')
+                    ->sum(
+                        fn ($invoice) => (float) $invoice->total
+                    );
+
+                return [
+                    'project_code' => $projectCode,
+                    'project_total' => $projectTotal,
+                    'invoice_count' => $invoices->count(),
+                    'paid_total' => $paidTotal,
+                    'remaining_total' => $projectTotal - $paidTotal,
+
+                    'invoices' => $invoices->map(
+                        fn ($invoice) => [
+                            'id' => $invoice->id,
+                            'invoice_number' =>
+                                $invoice->invoice_number,
+                            'installment_label' =>
+                                $invoice->installment_label,
+                            'invoice_date' =>
+                                $invoice->invoice_date,
+                            'status' =>
+                                $invoice->status,
+                            'total' =>
+                                (float) $invoice->total,
+                        ]
+                    )->values(),
+                ];
+            })
+            ->values();
+
+        return ApiResponse::success($projects);
     }
 }

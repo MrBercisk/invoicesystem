@@ -8,22 +8,54 @@ interface Props {
 }
 
 export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
+  // Status invoice: 'draft' | 'sent' | 'paid' | 'cancelled' — sesuaikan dengan kolom `status` di tabel invoices.
+  const status = invoice.status;
+
   return (
-    <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm text-zinc-900 max-w-[210mm] mx-auto">
-      {/* ── Executive Onyx & Crimson Header Bar ── */}
-      <div className="bg-zinc-950 p-8 sm:p-10 text-white border-b-4 border-red-600">
+    <div className="relative overflow-hidden bg-white border border-zinc-200 text-zinc-900 max-w-[210mm] mx-auto">
+      {status === 'draft' && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none select-none">
+          <span
+            className="font-extrabold uppercase text-zinc-400"
+            style={{ fontSize: '110px', letterSpacing: '14px', transform: 'rotate(-28deg)', opacity: 0.3 }}
+          >
+            Draft
+          </span>
+        </div>
+      )}
+      {status === 'paid' && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none select-none">
+          <div
+            className="border-[6px] border-emerald-500 text-emerald-500 font-extrabold uppercase px-8 py-3 rounded-md"
+            style={{ fontSize: '44px', letterSpacing: '8px', transform: 'rotate(-14deg)', opacity: 0.6 }}
+          >
+            Lunas
+          </div>
+        </div>
+      )}
+      {status === 'cancelled' && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none select-none">
+          <div
+            className="border-[6px] border-red-500 text-red-500 font-extrabold uppercase px-6 py-3 rounded-md"
+            style={{ fontSize: '38px', letterSpacing: '6px', transform: 'rotate(-14deg)', opacity: 0.6 }}
+          >
+            Dibatalkan
+          </div>
+        </div>
+      )}
+
+      {/* ── Header ── */}
+      <div className="bg-zinc-950 p-8 sm:p-10 text-white border-b-2 border-red-900">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
           <div>
             {invoice.company.logo && (
-              <div className="bg-white rounded-md p-2 inline-flex items-center justify-center mb-3.5 shadow-xs max-w-[190px]">
-                <img
-                  src={invoice.company.logo}
-                  alt={invoice.company.name}
-                  className="max-h-10 object-contain"
-                />
-              </div>
+              <img
+                src={invoice.company.logo}
+                alt={invoice.company.name}
+                className="max-h-9 max-w-[170px] object-contain mb-3"
+              />
             )}
-            <h1 className="text-xl font-bold text-white tracking-tight">{invoice.company.name}</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight">{invoice.company.name}</h1>
             <div className="text-xs text-zinc-400 mt-1.5 leading-relaxed space-y-0.5">
               {invoice.company.address && <div>{invoice.company.address}</div>}
               {invoice.company.city && <div>{invoice.company.city}, {invoice.company.country}</div>}
@@ -34,21 +66,52 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
           </div>
 
           <div className="text-left sm:text-right">
-            <div className="text-[10px] font-extrabold text-red-400 tracking-widest uppercase">Invoice Penagihan</div>
-            <div className="text-2xl font-extrabold font-mono text-white mt-1">{invoice.invoice_number}</div>
+            <div className="text-[10px] font-semibold text-red-200/70 tracking-wide uppercase">Invoice</div>
+            <div className="text-xl font-bold font-mono text-white mt-1">{invoice.invoice_number}</div>
             <div className="text-xs text-zinc-400 mt-2.5 space-y-1">
-              <div><span className="text-zinc-500">Tanggal Terbit: </span>{formatDate(invoice.invoice_date)}</div>
-              <div><span className="text-zinc-500">Jatuh Tempo: </span>{formatDate(invoice.due_date)}</div>
+              <div><span className="text-zinc-500">Tanggal </span>{formatDate(invoice.invoice_date)}</div>
+              <div><span className="text-zinc-500">Jatuh tempo </span>{formatDate(invoice.due_date)}</div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="p-8 sm:p-10">
+        {(invoice.project_code || invoice.installment_label) && (
+          <div
+            className={`grid gap-3 mb-6 ${
+              invoice.project_code && invoice.installment_label
+                ? 'grid-cols-1 sm:grid-cols-2'
+                : 'grid-cols-1'
+            }`}
+          >
+            {invoice.project_code && (
+              <div className="bg-zinc-50 border border-zinc-200 rounded-sm px-3 py-2.5">
+                <div className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">
+                  Project
+                </div>
+                <div className="text-xs font-mono font-semibold text-zinc-950">
+                  {invoice.project_code}
+                </div>
+              </div>
+            )}
+
+            {invoice.installment_label && (
+              <div className="bg-zinc-50 border border-zinc-200 rounded-sm px-3 py-2.5">
+                <div className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">
+                  Termin Pembayaran
+                </div>
+                <div className="text-xs font-semibold text-zinc-950">
+                  {invoice.installment_label}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         {/* ── Bill To ── */}
-        <div className="bg-zinc-50 border border-zinc-200 border-l-[3.5px] border-l-red-600 p-4 rounded-r-md mb-6">
-          <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-widest mb-1">Ditagihkan Kepada</div>
-          <div className="font-extrabold text-zinc-950 text-base">{invoice.client.name}</div>
+        <div className="pt-4 pb-5 mb-6 border-b border-zinc-200">
+          <div className="text-[10.5px] font-semibold text-zinc-500 mb-1.5">Ditagihkan kepada</div>
+          <div className="font-bold text-zinc-950 text-sm">{invoice.client.name}</div>
           <div className="text-xs text-zinc-600 mt-1 leading-relaxed">
             {invoice.client.pic_name && <div>u.p. <span className="font-medium text-zinc-800">{invoice.client.pic_name}</span></div>}
             {invoice.client.address && <div>{invoice.client.address}</div>}
@@ -58,29 +121,29 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
           </div>
         </div>
 
-        {/* ── Table Items ── */}
+        {/* ── Items ── */}
         <div className="overflow-x-auto mb-6">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-t border-b-2 border-zinc-900 bg-zinc-50">
-                <th className="py-2.5 px-3 font-bold text-zinc-800 uppercase tracking-wider text-[10px]">Deskripsi</th>
-                <th className="py-2.5 px-3 font-bold text-zinc-800 uppercase tracking-wider text-[10px] text-right w-16">Qty</th>
-                <th className="py-2.5 px-3 font-bold text-zinc-800 uppercase tracking-wider text-[10px] w-14">Sat.</th>
-                <th className="py-2.5 px-3 font-bold text-zinc-800 uppercase tracking-wider text-[10px] text-right w-32">Harga</th>
-                <th className="py-2.5 px-3 font-bold text-zinc-800 uppercase tracking-wider text-[10px] text-right w-32">Jumlah</th>
+              <tr className="border-b-[1.5px] border-zinc-900">
+                <th className="pb-2 pr-2 font-semibold text-zinc-500 text-[10px]">Deskripsi</th>
+                <th className="pb-2 px-2 font-semibold text-zinc-500 text-[10px] text-right w-16">Qty</th>
+                <th className="pb-2 px-2 font-semibold text-zinc-500 text-[10px] w-14">Sat.</th>
+                <th className="pb-2 px-2 font-semibold text-zinc-500 text-[10px] text-right w-32">Harga</th>
+                <th className="pb-2 pl-2 font-semibold text-zinc-500 text-[10px] text-right w-32">Jumlah</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {invoice.items.map((item, i) => (
                 <tr key={i}>
-                  <td className="py-3 px-3">
+                  <td className="py-3 pr-2">
                     <div className="font-semibold text-zinc-950">{item.name}</div>
                     {item.description && <div className="text-[11px] text-zinc-500 mt-0.5">{item.description}</div>}
                   </td>
-                  <td className="py-3 px-3 text-right font-mono text-zinc-700">{item.quantity}</td>
-                  <td className="py-3 px-3 text-zinc-400">{item.unit}</td>
-                  <td className="py-3 px-3 text-right font-mono text-zinc-700">{formatRupiah(item.price)}</td>
-                  <td className="py-3 px-3 text-right font-mono font-bold text-zinc-950">{formatRupiah(item.quantity * item.price)}</td>
+                  <td className="py-3 px-2 text-right font-mono text-zinc-700">{item.quantity}</td>
+                  <td className="py-3 px-2 text-zinc-400">{item.unit}</td>
+                  <td className="py-3 px-2 text-right font-mono text-zinc-700">{formatRupiah(item.price)}</td>
+                  <td className="py-3 pl-2 text-right font-mono font-bold text-zinc-950">{formatRupiah(item.quantity * item.price)}</td>
                 </tr>
               ))}
             </tbody>
@@ -89,7 +152,7 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
 
         {/* ── Totals ── */}
         <div className="flex justify-end mb-6">
-          <div className="w-72 space-y-2">
+          <div className="w-72 space-y-1.5">
             <div className="flex justify-between text-xs text-zinc-600">
               <span>Subtotal</span>
               <span className="font-mono text-zinc-900 font-medium">{formatRupiah(invoice.subtotal)}</span>
@@ -103,68 +166,68 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
             {invoice.discount > 0 && (
               <div className="flex justify-between text-xs text-zinc-600">
                 <span>Diskon</span>
-                <span className="font-mono text-red-600 font-medium">-{formatRupiah(invoice.discount)}</span>
+                <span className="font-mono text-red-800 font-medium">-{formatRupiah(invoice.discount)}</span>
               </div>
             )}
-            <div className="flex justify-between p-3 bg-zinc-950 text-white rounded-md text-sm font-bold border-l-4 border-red-600 mt-2 shadow-xs">
-              <span>Total Tagihan</span>
+            <div className="flex justify-between items-center p-3 bg-zinc-950 text-white text-sm font-bold border-l-2 border-red-900 mt-2">
+              <span>Total tagihan</span>
               <span className="font-mono text-base">{formatRupiah(invoice.total)}</span>
             </div>
           </div>
         </div>
 
-        {/* ── Terbilang Box ── */}
-        <div className="bg-zinc-50 border border-zinc-200 rounded-md p-3.5 mb-6 text-xs text-zinc-700">
-          <div className="font-bold text-zinc-900 uppercase tracking-wider text-[10px] mb-0.5">Terbilang:</div>
-          <div className="italic font-serif-invoice text-zinc-900 text-sm"># {terbilang(invoice.total)} #</div>
+        {/* ── Terbilang ── */}
+        <div className="mb-6 text-right">
+          <p className="text-[11px] text-zinc-500 italic">Terbilang: {terbilang(invoice.total)}</p>
         </div>
 
         {/* ── Bank Payment Info ── */}
         {invoice.company.bank_name && (
-          <div className="bg-zinc-50 border border-zinc-200 rounded-md p-3.5 mb-6 border-l-2 border-l-zinc-900">
-            <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-widest mb-1.5">Informasi Rekening Pembayaran</div>
-            <div className="text-xs text-zinc-700">Bank: <span className="font-semibold text-zinc-950">{invoice.company.bank_name}</span></div>
+          <div className="py-3 mb-6 border-t border-b border-zinc-200">
+            <div className="text-[10.5px] font-semibold text-zinc-500 mb-1.5">Pembayaran</div>
+            <div className="text-xs text-zinc-700">Bank <span className="font-semibold text-zinc-950">{invoice.company.bank_name}</span></div>
             {invoice.company.bank_account_name && (
-              <div className="text-xs text-zinc-700 mt-0.5">Atas Nama: <span className="font-semibold text-zinc-950">{invoice.company.bank_account_name}</span></div>
+              <div className="text-xs text-zinc-700 mt-0.5">a.n. <span className="font-semibold text-zinc-950">{invoice.company.bank_account_name}</span></div>
             )}
             {invoice.company.bank_account_number && (
-              <div className="text-xs text-zinc-700 mt-0.5">No. Rekening: <span className="font-mono font-bold text-zinc-950">{invoice.company.bank_account_number}</span></div>
+              <div className="text-xs text-zinc-700 mt-0.5">No. rekening <span className="font-mono font-bold text-zinc-950">{invoice.company.bank_account_number}</span></div>
             )}
           </div>
         )}
 
         {/* ── Notes / Terms ── */}
         {(invoice.notes || invoice.terms) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-zinc-600 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs text-zinc-600 mb-8">
             {invoice.notes && (
               <div>
-                <div className="font-bold text-zinc-800 uppercase tracking-wider text-[10px] mb-1">Catatan</div>
+                <div className="font-semibold text-zinc-500 text-[10.5px] mb-1">Catatan</div>
                 <p className="leading-relaxed text-zinc-600">{invoice.notes}</p>
               </div>
             )}
             {invoice.terms && (
               <div>
-                <div className="font-bold text-zinc-800 uppercase tracking-wider text-[10px] mb-1">Syarat & Ketentuan</div>
+                <div className="font-semibold text-zinc-500 text-[10.5px] mb-1">Syarat &amp; ketentuan</div>
                 <p className="leading-relaxed text-zinc-600">{invoice.terms}</p>
               </div>
             )}
           </div>
         )}
 
-        {/* ── Signature & Stamp Section ── */}
+        {/* ── Signature & Stamp ── */}
         <div className="flex justify-end mb-6">
-          <div className="w-56 text-center text-xs">
+          <div className="w-52 text-center text-xs">
             <div className="text-zinc-500 text-[11px] mb-1">
-              {invoice.company.city ? `${invoice.company.city}, ` : ''}{formatDate(invoice.invoice_date)}
+              {invoice.company.city ? `${invoice.company.city}, ` : ''}
+              {formatDate(invoice.invoice_date)}
             </div>
-            <div className="font-bold text-zinc-950 mb-1">Hormat Kami,</div>
+            <div className="font-semibold text-zinc-950 mb-1">Hormat kami,</div>
 
             <div className="relative h-20 flex items-center justify-center my-1">
               {invoice.company.stamp && (
                 <img
                   src={invoice.company.stamp}
                   alt="Stempel Perusahaan"
-                  className="absolute left-2 top-0 h-20 w-20 object-contain opacity-85 pointer-events-none select-none z-0"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 object-contain opacity-70 pointer-events-none select-none z-0"
                 />
               )}
               {invoice.company.signature ? (
@@ -178,20 +241,21 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
               )}
             </div>
 
-            <div className="border-b-2 border-zinc-950 pt-1 pb-1">
+            <div className="border-t-[1.5px] border-zinc-950 pt-1.5">
               <span className="font-bold text-zinc-950 text-xs">
                 {invoice.company.signature_name || invoice.company.name}
               </span>
             </div>
-            <div className="text-[10px] text-zinc-500 mt-1">
+            <div className="text-[10px] text-zinc-500 mt-0.5">
               {invoice.company.signature_title || 'Penanggung Jawab'}
             </div>
           </div>
         </div>
 
         {/* ── Footer ── */}
-        <div className="border-t border-zinc-200 pt-4 text-center text-[10px] text-zinc-400">
-          Terima kasih atas kepercayaan Anda • {invoice.company.name}{invoice.company.email && ` • ${invoice.company.email}`}
+        <div className="border-t border-zinc-200 pt-3 text-center text-[10px] text-zinc-400">
+          <div>{invoice.company.name}</div>
+          {invoice.company.email && <div>{invoice.company.email}</div>}
         </div>
       </div>
     </div>

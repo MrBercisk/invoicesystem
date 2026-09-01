@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  Pencil, 
-  Trash2, 
-  Send, 
-  CheckCircle2, 
+import {
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  Send,
+  CheckCircle2,
   Building2,
   Users,
-  MessageCircle
+  MessageCircle,
+  FolderKanban,
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
 import { InvoicePreview } from '../components/invoices/InvoicePreview';
@@ -75,15 +76,36 @@ export function InvoiceDetailPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-extrabold font-mono text-slate-950 tracking-tight">{invoice.invoice_number}</h1>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
+            <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5 flex-wrap">
               <span className="flex items-center gap-1.5 font-medium text-slate-700">
-                <Building2 size={13} className="text-slate-400" /> {invoice.company.name}
+                <Building2 size={13} className="text-slate-400" />
+                {invoice.company.name}
               </span>
+
               <span>•</span>
+
               <span className="flex items-center gap-1.5 font-medium text-slate-700">
-                <Users size={13} className="text-slate-400" /> {invoice.client.name}
+                <Users size={13} className="text-slate-400" />
+                {invoice.client.name}
               </span>
+
+              {invoice.installment_label && (
+                <>
+                  <span>•</span>
+
+                  <span className="font-semibold text-indigo-600">
+                    {invoice.installment_label}
+                  </span>
+                </>
+              )}
             </div>
+
+            {invoice.project_code && (
+              <div className="flex items-center gap-1.5 mt-1 text-[10px] font-mono text-slate-400">
+                <FolderKanban size={11} />
+                Project: {invoice.project_code}
+              </div>
+            )}
           </div>
         </div>
 

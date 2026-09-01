@@ -172,8 +172,25 @@ export function InvoicesPage() {
                 {invoices.map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-mono font-bold text-slate-900">{invoice.invoice_number}</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">{formatDate(invoice.invoice_date)}</div>
+                      <div className="font-mono font-bold text-slate-900">
+                        {invoice.invoice_number}
+                      </div>
+
+                      <div className="text-[11px] text-slate-400 mt-0.5">
+                        {formatDate(invoice.invoice_date)}
+                      </div>
+
+                      {invoice.installment_label && (
+                        <div className="text-[10px] font-semibold text-indigo-600 mt-1">
+                          {invoice.installment_label}
+                        </div>
+                      )}
+
+                      {invoice.project_code && (
+                        <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                          {invoice.project_code}
+                        </div>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-semibold text-slate-900">{invoice.client?.name}</div>

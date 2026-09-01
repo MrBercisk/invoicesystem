@@ -19,10 +19,16 @@ const invoiceSchema = z.object({
   client_id: z.number().min(1, 'Pilih klien'),
   invoice_date: z.string().min(1, 'Tanggal invoice wajib diisi'),
   due_date: z.string().min(1, 'Tanggal jatuh tempo wajib diisi'),
+
   tax_rate: z.number().default(11),
   discount: z.number().default(0),
+
   notes: z.string().optional(),
   terms: z.string().optional(),
+
+  project_code: z.string().optional(),
+  installment_label: z.string().optional(),
+
   items: z.array(itemSchema).min(1, 'Minimal 1 item'),
 });
 
@@ -49,6 +55,8 @@ export function InvoiceForm({ companies, clients, products, defaultValues, onSub
       discount: defaultValues?.discount ?? 0,
       notes: defaultValues?.notes || '',
       terms: defaultValues?.terms || '',
+      project_code: defaultValues?.project_code || '',
+      installment_label: defaultValues?.installment_label || '',
       items: defaultValues?.items?.map(i => ({
         product_id: i.product_id,
         name: i.name,
@@ -150,6 +158,47 @@ export function InvoiceForm({ companies, clients, products, defaultValues, onSub
           <label className={labelClass}>Tanggal Jatuh Tempo *</label>
           <input type="date" {...register('due_date')} className={inputClass} />
           {errors.due_date && <p className={errorClass}>{errors.due_date.message}</p>}
+        </div>
+      </div>
+      {/* Payment / Project */}
+      <div className="border border-gray-200 rounded-xl p-4 space-y-4">
+        <div>
+          <h3 className="font-semibold text-gray-800">
+            Pembayaran & Termin
+          </h3>
+          <p className="text-xs text-gray-500 mt-1">
+            Gunakan project dan termin jika invoice merupakan bagian dari pembayaran bertahap.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>
+              Kode Project
+            </label>
+
+            <input
+              {...register('project_code')}
+              placeholder="Contoh: PRJ-20260902-X7K2"
+              className={inputClass}
+            />
+
+            <p className="text-xs text-gray-400 mt-1">
+              Kosongkan jika invoice bukan bagian dari project/termin.
+            </p>
+          </div>
+
+          <div>
+            <label className={labelClass}>
+              Label Termin
+            </label>
+
+            <input
+              {...register('installment_label')}
+              placeholder="Contoh: Termin 1 — Uang Muka (50%)"
+              className={inputClass}
+            />
+          </div>
         </div>
       </div>
 

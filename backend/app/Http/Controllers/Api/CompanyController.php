@@ -9,7 +9,9 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Company;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Format;
 use Intervention\Image\Laravel\Facades\Image;
 
 class CompanyController extends Controller
@@ -24,6 +26,13 @@ class CompanyController extends Controller
     public function store(StoreCompanyRequest $request): JsonResponse
     {
         $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $this->storeImage(
+                $request->file('logo'),
+                'companies/logos'
+            );
+        }
 
         if ($request->hasFile('signature')) {
             $data['signature'] = $this->storeImage(
@@ -55,8 +64,17 @@ class CompanyController extends Controller
     ): JsonResponse {
         $data = $request->validated();
 
+        if ($request->hasFile('logo')) {
+            $this->deleteImage($company->getRawOriginal('logo'));
+
+            $data['logo'] = $this->storeImage(
+                $request->file('logo'),
+                'companies/logos'
+            );
+        }
+
         if ($request->hasFile('signature')) {
-            $this->deleteImage($company->signature);
+            $this->deleteImage($company->getRawOriginal('signature'));
 
             $data['signature'] = $this->storeImage(
                 $request->file('signature'),
@@ -65,7 +83,7 @@ class CompanyController extends Controller
         }
 
         if ($request->hasFile('stamp')) {
-            $this->deleteImage($company->stamp);
+            $this->deleteImage($company->getRawOriginal('stamp'));
 
             $data['stamp'] = $this->storeImage(
                 $request->file('stamp'),
@@ -83,8 +101,17 @@ class CompanyController extends Controller
     public function destroy(Company $company): JsonResponse
     {
         try {
-            $this->deleteImage($company->signature);
-            $this->deleteImage($company->stamp);
+            $this->deleteImage(
+                $company->getRawOriginal('logo')
+            );
+
+            $this->deleteImage(
+                $company->getRawOriginal('signature')
+            );
+
+            $this->deleteImage(
+                $company->getRawOriginal('stamp')
+            );
 
             $company->delete();
 
@@ -101,30 +128,34 @@ class CompanyController extends Controller
     /**
      * Compress and store image as WebP.
      */
-    private function storeImage($file, string $directory): string
-    {
+    private function storeImage(
+        UploadedFile $file,
+        string $directory
+    ): string {
         $filename = uniqid('', true) . '.webp';
-
         $path = $directory . '/' . $filename;
 
-        $image = Image::read($file);
+        $image = Image::decode($file);
 
         // Resize jika terlalu besar.
         $image->scaleDown(width: 1600);
 
-        // Encode ke WebP dengan quality 80.
-        $encoded = $image->toWebp(80);
+        // Encode sebagai WebP dengan quality 80.
+        $encoded = $image->encodeUsingFormat(
+            Format::WEBP,
+            quality: 80
+        );
 
         Storage::disk('public')->put(
             $path,
-            $encoded
+            (string) $encoded
         );
 
         return $path;
     }
 
     /**
-     * Delete old image from storage.
+     * Delete image from storage.
      */
     private function deleteImage(?string $path): void
     {

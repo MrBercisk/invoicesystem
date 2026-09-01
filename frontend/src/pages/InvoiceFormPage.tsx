@@ -12,8 +12,9 @@ import {
 
 import type { InvoiceItem, InvoiceFormData } from '../types';
 
-import InvoiceFormHeader  from '../components/invoices/InvoiceFormHeader';
+import InvoiceFormHeader from '../components/invoices/InvoiceFormHeader';
 import InvoiceEntitySection from '../components/invoices/InvoiceEntitySection';
+import InvoicePaymentSection from '../components/invoices/InvoicePaymentSection';
 import InvoiceItemsSection from '../components/invoices/InvoiceItemsSection';
 import InvoiceNotesSection from '../components/invoices/InvoiceNotesSection';
 import InvoiceTotalsSection from '../components/invoices/InvoiceTotalsSection';
@@ -72,12 +73,19 @@ export function InvoiceFormPage() {
       invoice_date: today,
       due_date: defaultDueDate,
       status: 'draft',
+
+      project_code: '',
+      installment_label: '',
+
       tax_rate: 11,
       discount: 0,
+
       notes:
         'Pembayaran dapat ditransfer ke rekening bank tertera. Harap sertakan nomor invoice pada berita transfer.',
+
       terms:
         'Jatuh tempo pembayaran adalah 14 hari sejak invoice diterbitkan.',
+
       items: [
         {
           name: '',
@@ -103,6 +111,10 @@ export function InvoiceFormPage() {
         invoice_date: existingInvoice.invoice_date,
         due_date: existingInvoice.due_date,
         status: existingInvoice.status,
+
+        project_code: existingInvoice.project_code || '',
+        installment_label: existingInvoice.installment_label || '',
+
         tax_rate: existingInvoice.tax_rate,
         discount: existingInvoice.discount,
         notes: existingInvoice.notes || '',
@@ -280,10 +292,17 @@ export function InvoiceFormPage() {
         isSaving={saveMutation.isPending}
       />
 
-      <InvoiceEntitySection
+    <InvoiceEntitySection
         register={register}
         companies={companies}
         clients={clients}
+      />
+
+      <InvoicePaymentSection
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        isEditing={isEditing}
       />
 
       <InvoiceItemsSection

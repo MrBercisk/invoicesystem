@@ -29,26 +29,39 @@ class StoreInvoiceRequest extends FormRequest
             'items.*.unit'         => 'nullable|string',
             'items.*.description'  => 'nullable|string',
             'items.*.product_id'   => 'nullable|exists:products,id',
+            'project_code' => ['nullable', 'string', 'max:100'],
+            'installment_label' => ['nullable', 'string', 'max:255'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'company_id.required'   => 'Perusahaan wajib dipilih.',
-            'company_id.exists'     => 'Perusahaan tidak ditemukan.',
-            'client_id.required'    => 'Client wajib dipilih.',
-            'client_id.exists'      => 'Client tidak ditemukan.',
+            'company_id.required' => 'Perusahaan wajib dipilih.',
+            'company_id.exists' => 'Perusahaan tidak ditemukan.',
+
+            'client_id.required' => 'Client wajib dipilih.',
+            'client_id.exists' => 'Client tidak ditemukan.',
+
             'invoice_date.required' => 'Tanggal invoice wajib diisi.',
-            'due_date.required'     => 'Tanggal jatuh tempo wajib diisi.',
+
+            'due_date.required' => 'Tanggal jatuh tempo wajib diisi.',
             'due_date.after_or_equal' => 'Tanggal jatuh tempo tidak boleh sebelum tanggal invoice.',
-            'items.required'        => 'Invoice harus memiliki minimal 1 item.',
-            'items.min'             => 'Invoice harus memiliki minimal 1 item.',
-            'items.*.name.required'     => 'Nama item wajib diisi.',
+
+            'items.required' => 'Invoice harus memiliki minimal 1 item.',
+            'items.min' => 'Invoice harus memiliki minimal 1 item.',
+
+            'items.*.name.required' => 'Nama item wajib diisi.',
             'items.*.quantity.required' => 'Jumlah item wajib diisi.',
-            'items.*.quantity.min'      => 'Jumlah item minimal 0.01.',
-            'items.*.price.required'    => 'Harga item wajib diisi.',
-            'items.*.price.min'         => 'Harga item tidak boleh negatif.',
+            'items.*.quantity.min' => 'Jumlah item minimal 0.01.',
+            'items.*.price.required' => 'Harga item wajib diisi.',
+            'items.*.price.min' => 'Harga item tidak boleh negatif.',
+
+            'project_code.string' => 'Kode project harus berupa teks.',
+            'project_code.max' => 'Kode project maksimal 100 karakter.',
+
+            'installment_label.string' => 'Label termin harus berupa teks.',
+            'installment_label.max' => 'Label termin maksimal 255 karakter.',
         ];
     }
 }

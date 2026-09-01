@@ -25,6 +25,9 @@ class StoreCompanyRequest extends FormRequest
             'npwp' => 'nullable|string|max:50',
             'website' => 'nullable|url|max:255',
 
+            // Logo
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+
             // Signature
             'signature' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'signature_name' => 'nullable|string|max:255',
@@ -45,10 +48,12 @@ class StoreCompanyRequest extends FormRequest
         return [
             'name.required' => 'Nama perusahaan wajib diisi.',
             'name.max' => 'Nama perusahaan maksimal 255 karakter.',
-
             'email.email' => 'Format email tidak valid.',
-
             'website.url' => 'Format website tidak valid.',
+
+            'logo.image' => 'File logo harus berupa gambar.',
+            'logo.mimes' => 'Logo harus berformat JPG, JPEG, PNG, atau WebP.',
+            'logo.max' => 'Ukuran logo maksimal 5 MB.',
 
             'signature.image' => 'File tanda tangan harus berupa gambar.',
             'signature.mimes' => 'Tanda tangan harus berformat JPG, JPEG, PNG, atau WebP.',

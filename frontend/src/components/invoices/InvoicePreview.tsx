@@ -119,6 +119,71 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
       </head>
       <body>
       ${headerSection}
+
+        ${invoice.project_code || invoice.installment_label ? `
+          <div style="
+            display:grid;
+            grid-template-columns:${invoice.project_code && invoice.installment_label ? '1fr 1fr' : '1fr'};
+            gap:8px;
+            margin-bottom:18px;
+          ">
+            ${invoice.project_code ? `
+              <div style="
+                background:#fafafa;
+                border:1px solid #e4e4e7;
+                border-radius:4px;
+                padding:9px 12px;
+              ">
+                <div style="
+                  font-size:8px;
+                  font-weight:800;
+                  color:#71717a;
+                  text-transform:uppercase;
+                  letter-spacing:1px;
+                  margin-bottom:2px;
+                ">
+                  Project
+                </div>
+                <div style="
+                  font-family:'JetBrains Mono', monospace;
+                  font-size:11px;
+                  font-weight:700;
+                  color:#09090b;
+                ">
+                  ${invoice.project_code}
+                </div>
+              </div>
+            ` : ''}
+
+            ${invoice.installment_label ? `
+              <div style="
+                background:#fafafa;
+                border:1px solid #e4e4e7;
+                border-radius:4px;
+                padding:9px 12px;
+              ">
+                <div style="
+                  font-size:8px;
+                  font-weight:800;
+                  color:#71717a;
+                  text-transform:uppercase;
+                  letter-spacing:1px;
+                  margin-bottom:2px;
+                ">
+                  Termin Pembayaran
+                </div>
+                <div style="
+                  font-size:11px;
+                  font-weight:700;
+                  color:#09090b;
+                ">
+                  ${invoice.installment_label}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
         <div class="bill-to">
           <div class="bill-to-label">Ditagihkan Kepada</div>
           <div class="client-name">${invoice.client.name}</div>

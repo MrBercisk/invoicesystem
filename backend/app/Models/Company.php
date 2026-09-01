@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Company extends Model
 {
@@ -34,5 +36,32 @@ class Company extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    protected function logo(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Storage::disk('public')->url($value)
+                : null,
+        );
+    }
+
+    protected function signature(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Storage::disk('public')->url($value)
+                : null,
+        );
+    }
+
+    protected function stamp(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Storage::disk('public')->url($value)
+                : null,
+        );
     }
 }

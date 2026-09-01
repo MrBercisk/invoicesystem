@@ -10,6 +10,22 @@ import type {
   Product,
 } from '../types';
 
+export interface InvoiceProject {
+  project_code: string;
+  project_total: number;
+  invoice_count: number;
+  paid_total: number;
+  remaining_total: number;
+  invoices: {
+    id: number;
+    invoice_number: string;
+    installment_label?: string;
+    invoice_date: string;
+    status: InvoiceStatus;
+    total: number;
+  }[];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Base URL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -221,6 +237,19 @@ export const invoicesApi = {
   ) =>
     api
       .get<PaginatedResponse<Invoice>>('/invoices', { params })
+      .then((r) => r.data),
+  
+  getProjects: (
+    companyId: number,
+    clientId: number,
+  ) =>
+    api
+      .get<InvoiceProject[]>('/invoices/projects', {
+        params: {
+          company_id: companyId,
+          client_id: clientId,
+        },
+      })
       .then((r) => r.data),
 
   getOne: (id: number) =>

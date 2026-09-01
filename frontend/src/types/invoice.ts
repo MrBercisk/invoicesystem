@@ -27,7 +27,6 @@ export interface Invoice {
 
   company: Company;
   client: Client;
-
   items: InvoiceItem[];
 
   invoice_date: string;
@@ -43,6 +42,9 @@ export interface Invoice {
 
   notes?: string;
   terms?: string;
+
+  project_code?: string;
+  installment_label?: string;
 
   created_at: string;
 }

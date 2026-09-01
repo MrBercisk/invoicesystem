@@ -2,10 +2,10 @@ FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev libzip-dev \
-    zip unzip libjpeg-dev libfreetype6-dev libicu-dev \
+    zip unzip libjpeg-dev libfreetype6-dev libicu-dev libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-configure gd --with-jpeg --with-freetype \
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype --with-webp \
     && docker-php-ext-install \
     pdo_mysql \
     mbstring \
