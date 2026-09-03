@@ -6,6 +6,13 @@ export type { InvoiceFormData, InvoiceFormItem} from './invoice-form';
 export type { CompanyFormValues} from './company-form';
 
 export type {
+  HandoverDocument,
+  HandoverDocumentItem,
+  HandoverStatus,
+  HandoverItemType
+} from './handover';
+
+export type {
   Invoice,
   InvoiceItem,
   InvoiceStatus,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\HandoverPdfLink;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -11,4 +12,9 @@ Artisan::command('inspire', function () {
 
 Schedule::call(function () {
     InvoicePdfLink::where('expires_at', '<', now())->delete();
+})->daily();
+
+
+Schedule::call(function () {
+    HandoverPdfLink::where('expires_at', '<', now())->delete();
 })->daily();

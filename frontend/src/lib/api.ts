@@ -8,6 +8,9 @@ import type {
   InvoiceStatus,
   PaginatedResponse,
   Product,
+  HandoverDocument,
+  HandoverDocumentItem, 
+  HandoverStatus
 } from '../types';
 
 export interface InvoiceProject {
@@ -295,6 +298,67 @@ export const invoicesApi = {
     template: 'minimalis' | 'formal' | 'gradient' = 'minimalis'
   ): Promise<{ url: string; expiresAt: string }> => {
     const res = await api.get(`/invoices/${id}/pdf-url`, {
+      params: { template },
+    });
+
+    return {
+      url: res.data.url,
+      expiresAt: res.data.expires_at,
+    };
+  },
+};
+
+export const handoverApi = {
+  getAll: (
+    params?: {
+      status?: string;
+      client_id?: number;
+      invoice_id?: number;
+      search?: string;
+      page?: number;
+    }
+  ) =>
+    api
+      .get<PaginatedResponse<HandoverDocument>>('/handover-documents', { params })
+      .then((r) => r.data),
+
+  getOne: (id: number) =>
+    api
+      .get<HandoverDocument>(`/handover-documents/${id}`)
+      .then((r) => r.data),
+
+  create: (
+    data: Partial<HandoverDocument> & {
+      items: HandoverDocumentItem[];
+    }
+  ) =>
+    api
+      .post<HandoverDocument>('/handover-documents', data)
+      .then((r) => r.data),
+
+  update: (
+    id: number,
+    data: Partial<HandoverDocument> & {
+      items?: HandoverDocumentItem[];
+    }
+  ) =>
+    api
+      .put<HandoverDocument>(`/handover-documents/${id}`, data)
+      .then((r) => r.data),
+
+  updateStatus: (id: number, status: HandoverStatus) =>
+    api
+      .patch<HandoverDocument>(`/handover-documents/${id}/status`, { status })
+      .then((r) => r.data),
+
+  delete: (id: number) =>
+    api.delete(`/handover-documents/${id}`),
+
+  getPdfUrl: async (
+    id: number,
+    template: 'minimalis' | 'formal' | 'gradient' = 'minimalis'
+  ): Promise<{ url: string; expiresAt: string }> => {
+    const res = await api.get(`/handover-documents/${id}/pdf-url`, {
       params: { template },
     });
 

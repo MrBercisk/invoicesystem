@@ -11,6 +11,9 @@ import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
 import { CompaniesPage } from './pages/CompaniesPage';
 import { ClientsPage } from './pages/ClientsPage';
 import { ProductsPage } from './pages/ProductsPage';
+import { HandoverListPage } from './pages/HandoverListPage';
+import { HandoverFormPage } from './pages/HandoverFormPage';
+import { HandoverDetailPage } from './pages/HandoverDetailPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +42,10 @@ export function App() {
                 <Route path="companies" element={<CompaniesPage />} />
                 <Route path="clients" element={<ClientsPage />} />
                 <Route path="products" element={<ProductsPage />} />
+                <Route path="/handover-documents" element={<HandoverListPage />} />
+                <Route path="/handover-documents/new" element={<HandoverFormPage />} />
+                <Route path="/handover-documents/:id" element={<HandoverDetailPage />} />
+                <Route path="/handover-documents/:id/edit" element={<HandoverFormPage />} />
               </Route>
             </Route>
           </Routes>

@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+
 import {
   FileText,
   Building2,
@@ -7,11 +8,17 @@ import {
   LayoutDashboard,
   Plus,
   ReceiptText,
+  ClipboardCheck,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Ringkasan', href: '/', icon: LayoutDashboard },
   { name: 'Faktur / Invoice', href: '/invoices', icon: FileText },
+  {
+    name: 'Dokumen Serah Terima',
+    href: '/handover-documents',
+    icon: ClipboardCheck,
+  },
   { name: 'Profil Perusahaan', href: '/companies', icon: Building2 },
   { name: 'Buku Kontak Klien', href: '/clients', icon: Users },
   { name: 'Katalog Produk & Jasa', href: '/products', icon: Package },
@@ -22,6 +29,8 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-zinc-950 text-zinc-300 border-r border-zinc-800/80 z-30">
+
+      {/* Brand */}
       <div className="p-5 border-b border-zinc-800/80 flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-black shadow-sm">
           <ReceiptText size={18} />
@@ -29,26 +38,28 @@ export function Sidebar() {
 
         <div>
           <div className="font-extrabold text-white text-sm tracking-tight leading-none">
-            Invoice<span className="text-red-500">Gen</span>
+            Do<span className="text-red-500">Kuy</span>
           </div>
 
           <div className="text-[10px] text-zinc-400 font-medium mt-1 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
-            Sistem Faktur & Billing
+            Dokumen Bisnis Jadi Mudah
           </div>
         </div>
       </div>
 
+      {/* Create Document */}
       <div className="p-3.5">
         <Link
           to="/invoices/new"
           className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white font-bold px-3.5 py-2.5 rounded-lg text-xs transition-all shadow-xs active:scale-[0.98]"
         >
           <Plus size={15} />
-          <span>Buat Faktur Baru</span>
+          <span>Buat Dokumen Baru</span>
         </Link>
       </div>
 
+      {/* Main Menu */}
       <div className="px-3.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
         Menu Utama
       </div>
@@ -85,14 +96,20 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Footer */}
       <div className="p-3.5 border-t border-zinc-800/80 bg-zinc-950/90 flex flex-col gap-1.5">
-       
+        <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+          <span className="font-semibold text-zinc-300">
+            DoKuy
+          </span>
+        </div>
 
         <div className="pt-1.5 border-t border-zinc-900/90 text-[9.5px] text-zinc-500 leading-tight">
           <span>© {new Date().getFullYear()} by </span>
 
           <span className="font-semibold text-zinc-300 hover:text-red-400 transition-colors">
-            Bercisk Software Engineer
+            BeEs
           </span>
         </div>
       </div>

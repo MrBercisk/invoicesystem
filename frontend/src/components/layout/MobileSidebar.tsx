@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+
 import {
   FileText,
   Building2,
@@ -13,6 +14,7 @@ import {
 const navigation = [
   { name: 'Ringkasan', href: '/', icon: LayoutDashboard },
   { name: 'Faktur / Invoice', href: '/invoices', icon: FileText },
+  { name: 'Dokumen Serah Terima', href: '/handovers', icon: ReceiptText },
   { name: 'Profil Perusahaan', href: '/companies', icon: Building2 },
   { name: 'Buku Kontak Klien', href: '/clients', icon: Users },
   { name: 'Katalog Produk & Jasa', href: '/products', icon: Package },
@@ -34,6 +36,8 @@ export function MobileSidebar({
   return (
     <div className="md:hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex">
       <div className="bg-zinc-950 text-zinc-200 w-72 h-full p-5 flex flex-col border-r border-zinc-800 shadow-2xl">
+
+        {/* Logo */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
           <div className="flex items-center gap-2.5 font-bold text-white text-base">
             <div className="w-7 h-7 rounded-md bg-red-600 text-white flex items-center justify-center font-black shadow-xs">
@@ -41,7 +45,7 @@ export function MobileSidebar({
             </div>
 
             <span className="font-extrabold">
-              Invoice<span className="text-red-500">Gen</span>
+              Do<span className="text-red-500">Kuy</span>
             </span>
           </div>
 
@@ -54,15 +58,17 @@ export function MobileSidebar({
           </button>
         </div>
 
+        {/* Create Document */}
         <Link
           to="/invoices/new"
           onClick={onClose}
           className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg shadow-xs mb-5 text-xs transition-colors"
         >
           <Plus size={15} />
-          Buat Faktur Baru
+          Buat Dokumen Baru
         </Link>
 
+        {/* Navigation */}
         <nav className="space-y-1 flex-1">
           {navigation.map((item) => {
             const isActive =
@@ -98,21 +104,23 @@ export function MobileSidebar({
           })}
         </nav>
 
+        {/* Footer */}
         <div className="pt-4 border-t border-zinc-800 text-[10px] text-zinc-400 flex flex-col items-center gap-1 text-center">
           <div className="flex items-center gap-1 text-zinc-300 font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />
-            <span>InvoiceGen</span>
+            <span>DoKuy</span>
           </div>
 
           <div className="text-zinc-500 font-mono text-[9.5px]">
             © {new Date().getFullYear()} by{' '}
             <span className="text-zinc-300 font-medium">
-              Bercisk Software Engineer
+              BeEs
             </span>
           </div>
         </div>
       </div>
 
+      {/* Overlay */}
       <div
         className="flex-1"
         onClick={onClose}

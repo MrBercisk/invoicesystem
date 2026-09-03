@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\HandoverDocumentController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ProductController;
 Route::prefix('v1')->group(function () {
@@ -35,5 +36,17 @@ Route::prefix('v1')->group(function () {
         );
 
         Route::apiResource('invoices', InvoiceController::class);
+
+        Route::patch(
+            'handover-documents/{handoverDocument}/status',
+            [HandoverDocumentController::class, 'updateStatus']
+        );
+
+        Route::get(
+            'handover-documents/{handoverDocument}/pdf-url',
+            [HandoverDocumentController::class, 'pdfUrl']
+        );
+
+        Route::apiResource('handover-documents', HandoverDocumentController::class);
     });
 });
