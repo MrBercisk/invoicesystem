@@ -6,6 +6,7 @@ import {
   Users,
   Package,
   LayoutDashboard,
+  Plus,
   ReceiptText,
   ClipboardCheck,
 } from 'lucide-react';
@@ -47,6 +48,16 @@ export function Sidebar() {
         </div>
       </div>
 
+      {/* Create Document */}
+      <div className="p-3.5">
+        <Link
+          to="/invoices/new"
+          className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white font-bold px-3.5 py-2.5 rounded-lg text-xs transition-all shadow-xs active:scale-[0.98]"
+        >
+          <Plus size={15} />
+          <span>Buat Dokumen Baru</span>
+        </Link>
+      </div>
 
       {/* Main Menu */}
       <div className="px-3.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
