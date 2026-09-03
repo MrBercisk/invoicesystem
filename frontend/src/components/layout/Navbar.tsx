@@ -81,7 +81,7 @@ export function Navbar({ onOpenMobileMenu }: ModernNavbarProps) {
     const path = location.pathname;
 
     if (path === '/') {
-      return [{ label: 'Ringkasan', href: '/' }];
+      return [{ label: 'Dashboard', href: '/' }];
     }
 
     // Invoice list

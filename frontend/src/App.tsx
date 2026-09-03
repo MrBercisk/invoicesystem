@@ -15,6 +15,7 @@ import { HandoverListPage } from './pages/HandoverListPage';
 import { HandoverFormPage } from './pages/HandoverFormPage';
 import { HandoverDetailPage } from './pages/HandoverDetailPage';
 
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

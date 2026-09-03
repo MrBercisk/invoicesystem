@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Ringkasan', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Faktur / Invoice', href: '/invoices', icon: FileText },
   { name: 'Dokumen Serah Terima', href: '/handovers', icon: ReceiptText },
   { name: 'Profil Perusahaan', href: '/companies', icon: Building2 },
@@ -106,15 +106,11 @@ export function MobileSidebar({
 
         {/* Footer */}
         <div className="pt-4 border-t border-zinc-800 text-[10px] text-zinc-400 flex flex-col items-center gap-1 text-center">
-          <div className="flex items-center gap-1 text-zinc-300 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />
-            <span>DoKuy</span>
-          </div>
-
+          
           <div className="text-zinc-500 font-mono text-[9.5px]">
-            © {new Date().getFullYear()} by{' '}
+            © {new Date().getFullYear()} {' '}
             <span className="text-zinc-300 font-medium">
-              BeEs
+                 Developed by Moracraft - BeEs Software Engineer
             </span>
           </div>
         </div>
