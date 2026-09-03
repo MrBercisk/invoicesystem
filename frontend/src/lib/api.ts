@@ -293,11 +293,14 @@ export const invoicesApi = {
   getPdfUrl: async (
     id: number,
     template: 'minimalis' | 'formal' | 'gradient' = 'minimalis'
-  ): Promise<string> => {
+  ): Promise<{ url: string; expiresAt: string }> => {
     const res = await api.get(`/invoices/${id}/pdf-url`, {
       params: { template },
     });
 
-    return res.data.url;
+    return {
+      url: res.data.url,
+      expiresAt: res.data.expires_at,
+    };
   },
 };

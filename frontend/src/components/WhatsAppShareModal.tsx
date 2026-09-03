@@ -56,8 +56,10 @@ export function WhatsAppShareModal({ invoice, isOpen, onClose, pdfTemplate = 'mi
   const [copied, setCopied] = useState(false);
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfExpiresAt, setPdfExpiresAt] = useState<string | null>(null);
   const [pdfUrlLoading, setPdfUrlLoading] = useState(false);
   const [pdfUrlError, setPdfUrlError] = useState(false);
+
 
   // Fetch signed PDF URL sesuai template desain yang sedang aktif,
   // setiap kali modal dibuka atau invoice/template-nya berganti.
@@ -70,8 +72,11 @@ export function WhatsAppShareModal({ invoice, isOpen, onClose, pdfTemplate = 'mi
 
     invoicesApi
       .getPdfUrl(invoice.id, pdfTemplate)
-      .then((url) => {
-        if (!cancelled) setPdfUrl(url);
+      .then(({ url, expiresAt }) => {
+        if (!cancelled) {
+          setPdfUrl(url);
+          setPdfExpiresAt(expiresAt);
+        }
       })
       .catch(() => {
         if (!cancelled) setPdfUrlError(true);
@@ -93,8 +98,9 @@ export function WhatsAppShareModal({ invoice, isOpen, onClose, pdfTemplate = 'mi
       templateType,
       includeBankInfo,
       pdfUrl: hasPdfUrl && includePdfLink ? pdfUrl! : undefined,
+      pdfExpiresAt: hasPdfUrl && includePdfLink ? pdfExpiresAt ?? undefined : undefined,
     });
-  }, [invoice, templateType, includeBankInfo, includePdfLink, hasPdfUrl, pdfUrl]);
+  }, [invoice, templateType, includeBankInfo, includePdfLink, hasPdfUrl, pdfUrl, pdfExpiresAt]);
 
   if (!isOpen) return null;
 
@@ -238,7 +244,7 @@ export function WhatsAppShareModal({ invoice, isOpen, onClose, pdfTemplate = 'mi
                 <Loader2 size={13} className="animate-spin" />
                 <span className="text-[11px]">Menyiapkan link PDF ({pdfTemplate})...</span>
               </div>
-            ) : hasPdfUrl ? (
+           ) : hasPdfUrl ? (
               <div className="flex items-center gap-2 p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
                 <input
                   type="checkbox"
@@ -247,9 +253,14 @@ export function WhatsAppShareModal({ invoice, isOpen, onClose, pdfTemplate = 'mi
                   onChange={(e) => setIncludePdfLink(e.target.checked)}
                   className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer w-4 h-4"
                 />
-                <label htmlFor="includePdf" className="text-xs text-zinc-700 cursor-pointer select-none font-medium flex items-center gap-1.5">
+                <label htmlFor="includePdf" className="text-xs text-zinc-700 cursor-pointer select-none font-medium flex items-center gap-1.5 flex-wrap">
                   <FileDown size={13} className="text-zinc-500" />
-                  Sertakan link untuk lihat/cetak PDF faktur
+                  <span>Sertakan link untuk lihat/cetak PDF faktur</span>
+                  {pdfExpiresAt && (
+                    <span className="text-[10px] text-zinc-400 font-normal">
+                      (berlaku s.d. {new Date(pdfExpiresAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })})
+                    </span>
+                  )}
                 </label>
               </div>
             ) : (

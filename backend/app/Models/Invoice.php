@@ -5,7 +5,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class Invoice extends Model {
     use SoftDeletes;
@@ -17,7 +19,6 @@ class Invoice extends Model {
         'notes', 'terms',
         'project_code', 'installment_label','project_total_value',
     ];
-    protected $appends = ['pdf_url'];
 
     protected $casts = [
         'invoice_date' => 'date',
@@ -120,16 +121,40 @@ class Invoice extends Model {
         return $this->project_total - $paidIncludingSelf;
     }
 
-    public function pdfUrl(string $template = 'minimalis'): string
+    public function pdfLink(string $template = 'minimalis', int $expiresInDays = 30): array
     {
-        return URL::signedRoute('invoices.pdf.public', [
-            'invoice' => $this->id,
-            'template' => $template,
+        $existing = InvoicePdfLink::where('invoice_id', $this->id)
+            ->where('template', $template)
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+
+        if ($existing) {
+            return [
+                'url' => URL::to('/inv/' . $existing->token),
+                'expires_at' => $existing->expires_at,
+            ];
+        }
+
+        $token = Str::random(24);
+
+        $link = InvoicePdfLink::create([
+            'token'      => $token,
+            'invoice_id' => $this->id,
+            'template'   => $template,
+            'expires_at' => now()->addDays($expiresInDays),
         ]);
+
+        return [
+            'url' => URL::to('/inv/' . $token),
+            'expires_at' => $link->expires_at,
+        ];
     }
 
-    public function getPdfUrlAttribute(): string
+    // Tetap dipertahankan untuk backward-compat kalau ada tempat lain yang cuma butuh string URL
+    public function pdfUrl(string $template = 'minimalis', int $expiresInDays = 30): string
     {
-        return $this->pdfUrl('minimalis');
+        return $this->pdfLink($template, $expiresInDays)['url'];
     }
+
 }

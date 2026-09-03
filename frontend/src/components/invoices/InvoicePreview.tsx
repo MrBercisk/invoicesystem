@@ -7,6 +7,7 @@ import { PreviewGradient } from './PreviewGradient';
 import { type Template, templateMeta, getTemplateStyles } from './invoiceTemplateStyles';
 import { terbilang } from '../../lib/terbilang';
 import { WhatsAppShareModal } from '../WhatsAppShareModal';
+import { invoicesApi } from '../../lib/api';
 
 interface Props {
   invoice: Invoice;
@@ -23,6 +24,7 @@ const STATUS_MAP: Record<InvoiceStatus, { label: string; dot: string; text: stri
 export function InvoicePreview({ invoice, onStatusChange }: Props) {
   const [template, setTemplate] = useState<Template>('minimalis');
   const [waModalOpen, setWaModalOpen] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false); 
 
   const formatRupiah = (n: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -323,6 +325,20 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
     win.document.close();
   };
 
+  const handleDownloadPdf = async () => {
+  if (downloadingPdf) return;
+    try {
+      setDownloadingPdf(true);
+      const { url } = await invoicesApi.getPdfUrl(invoice.id, template);
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Gagal mengambil PDF invoice:', err);
+      alert('Gagal membuat PDF. Silakan coba lagi.');
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
   const s = STATUS_MAP[invoice.status];
   const previewProps = { invoice, formatRupiah, formatDate };
 
@@ -392,10 +408,12 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
             <Printer size={14} /> Cetak
           </button>
           <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-3.5 py-2 rounded-lg transition-colors shadow-xs"
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-3.5 py-2 rounded-lg transition-colors shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <Download size={14} /> Simpan PDF
+            <Download size={14} className={downloadingPdf ? 'animate-pulse' : ''} />
+            {downloadingPdf ? 'Membuat PDF…' : 'Simpan PDF'}
           </button>
         </div>
       </div>

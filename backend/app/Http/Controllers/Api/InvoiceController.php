@@ -210,8 +210,11 @@ class InvoiceController extends Controller
 
         $template = $request->input('template', 'minimalis');
 
+        $link = $invoice->pdfLink($template);
+
         return ApiResponse::success([
-            'url' => $invoice->pdfUrl($template),
+            'url' => $link['url'],
+            'expires_at' => $link['expires_at']->toIso8601String(),
         ]);
     }
     

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\InvoicePdfLink;
 use App\Support\PdfTemplateStyles;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -11,20 +12,17 @@ class PublicInvoicePdfController extends Controller
 {
     private const ALLOWED_TEMPLATES = ['minimalis', 'formal', 'gradient'];
 
-    public function show(Request $request, Invoice $invoice)
+    public function show(Request $request, string $token)
     {
-        abort_unless(
-            $request->hasValidSignature(),
-            403,
-            'Link tidak valid atau sudah tidak berlaku.'
-        );
+        $link = InvoicePdfLink::where('token', $token)->first();
 
-        $template = in_array(
-            $request->query('template'),
-            self::ALLOWED_TEMPLATES,
-            true
-        )
-            ? $request->query('template')
+        abort_if($link === null, 403, 'Link tidak valid atau sudah tidak berlaku.');
+        abort_if($link->isExpired(), 403, 'Link sudah kedaluwarsa.');
+
+        $invoice = Invoice::findOrFail($link->invoice_id);
+
+        $template = in_array($link->template, self::ALLOWED_TEMPLATES, true)
+            ? $link->template
             : 'minimalis';
 
         $invoice->load(['company', 'client', 'items']);
@@ -51,6 +49,7 @@ class PublicInvoicePdfController extends Controller
 
         return $pdf->stream($filename);
     }
+
     private function imagePath(?string $url): ?string
     {
         if (!$url) {

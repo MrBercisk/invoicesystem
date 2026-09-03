@@ -8,26 +8,11 @@ export interface WhatsAppMessageOptions {
   templateType?: WhatsAppTemplateType;
   customPhone?: string;
   includeBankInfo?: boolean;
-  /**
-   * Override eksplisit tahap termin. Berguna kalau `installment_label` di invoice
-   * tidak cukup jelas untuk dideteksi otomatis, atau kalau UI sudah tahu pasti
-   * (misal: ini invoice pertama project -> 'dp', ini invoice terakhir -> 'final').
-   */
   installmentStage?: InstallmentStage;
-  /**
-   * Nilai total kontrak project. Dipakai untuk menghitung sisa tagihan pada
-   * invoice DP/termin (project_total_value - total invoice ini).
-   * Kalau tidak diisi, akan fallback ke invoice.project_total_value (kalau ada).
-   */
   projectTotalValue?: number;
-  /**
-   * Link publik ke PDF invoice (misal invoice.pdf_url dari backend). Kalau diisi,
-   * link ini akan disisipkan ke pesan WhatsApp supaya penerima bisa langsung
-   * buka/cetak PDF-nya.
-   */
   pdfUrl?: string;
+  pdfExpiresAt?: string;
 }
-
 /**
  * Format Indonesian phone number into clean WhatsApp international format (e.g. 6281234567890)
  */
@@ -106,7 +91,7 @@ function resolveInstallmentStage(
  * Build clean formatted text for WhatsApp message
  */
 export function generateWhatsAppMessage(invoice: Invoice, options: WhatsAppMessageOptions = {}): string {
-  const { templateType = 'standard', includeBankInfo = true, pdfUrl } = options;
+  const { templateType = 'standard', includeBankInfo = true, pdfUrl, pdfExpiresAt } = options;
 
   const clientName = invoice.client?.name || 'Bapak/Ibu';
   const companyName = invoice.company?.name || 'Perusahaan';
@@ -119,9 +104,16 @@ export function generateWhatsAppMessage(invoice: Invoice, options: WhatsAppMessa
   const projectTotal = options.projectTotalValue ?? invoice.project_total_value ?? undefined;
   const projectLine = invoice.project_code ? `\n- Project: ${invoice.project_code}` : '';
 
+  const pdfExpiryNote = pdfUrl && pdfExpiresAt
+    ? `\n_(Link berlaku hingga ${formatDate(pdfExpiresAt)}, mohon diunduh sebelum tanggal tersebut ya 🙏)_`
+    : '';
+
   // Blok link PDF, dipakai di semua template kalau pdfUrl tersedia
-  const pdfBlock = pdfUrl ? `\n\nLihat / Cetak Invoice (PDF):\n${pdfUrl}` : '';
-  const pdfBlockShort = pdfUrl ? `\n\nCetak/lihat PDF: ${pdfUrl}` : '';
+  const pdfBlock = pdfUrl ? `\n\nLihat / Cetak Invoice (PDF):\n${pdfUrl}${pdfExpiryNote}` : '';
+  const pdfBlockShort = pdfUrl
+    ? `\n\nCetak/lihat PDF: ${pdfUrl}${pdfExpiresAt ? ` (berlaku s.d. ${formatDate(pdfExpiresAt)})` : ''}`
+    : '';
+  
 
   // Bank Account Info block
   let bankBlock = '';
@@ -248,41 +240,41 @@ Terima kasih! 🙏`;
           ? '📄 *FAKTUR TERMIN*'
           : '📄 *FAKTUR PENAGIHAN*';
 
-      const pdfLine = pdfUrl
-        ? `\n\nDokumen tagihan resmi dapat diunduh/dicetak melalui link berikut:\n${pdfUrl}`
+       const pdfLine = pdfUrl
+        ? `\n\nDokumen tagihan resmi dapat diunduh/dicetak melalui link berikut:\n${pdfUrl}${pdfExpiryNote}`
         : '\n\nDokumen tagihan resmi dapat diakses dan diunduh dalam bentuk PDF.';
 
       return `Kepada Yth.
-${clientName}
+      ${clientName}
 
-Berikut kami sampaikan rincian tagihan faktur dari ${companyName}:
+      Berikut kami sampaikan rincian tagihan faktur dari ${companyName}:
 
-━━━━━━━━━━━━━━━━━━━━
-${stageHeader}
-━━━━━━━━━━━━━━━━━━━━
-- No. Faktur : ${invoiceNumber}${projectLine ? `\n• Project     : ${invoice.project_code}` : ''}
-- Tanggal     : ${invDate}
-- Jatuh Tempo : ${dueDate}
-- Total Bayar : ${totalStr}${itemSummary}${bankBlock}${pdfLine}
+      ━━━━━━━━━━━━━━━━━━━━
+      ${stageHeader}
+      ━━━━━━━━━━━━━━━━━━━━
+      - No. Faktur : ${invoiceNumber}${projectLine ? `\n• Project     : ${invoice.project_code}` : ''}
+      - Tanggal     : ${invDate}
+      - Jatuh Tempo : ${dueDate}
+      - Total Bayar : ${totalStr}${itemSummary}${bankBlock}${pdfLine}
 
-Mohon konfirmasi apabila pembayaran telah selesai diproses.
+      Mohon konfirmasi apabila pembayaran telah selesai diproses.
 
-Terima kasih atas kerja sama dan kepercayaan Anda.
+      Terima kasih atas kerja sama dan kepercayaan Anda.
 
-Hormat kami,
-${companyName}`;
-    }
-  }
-}
+      Hormat kami,
+      ${companyName}`;
+          }
+        }
+      }
 
-/**
- * Generate click-to-chat WhatsApp direct URL
- */
-export function getWhatsAppUrl(phone: string, message: string): string {
-  const cleanPhone = formatWhatsAppPhone(phone);
-  const encodedText = encodeURIComponent(message);
-  if (cleanPhone) {
-    return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
-  }
-  return `https://api.whatsapp.com/send?text=${encodedText}`;
-}
+      /**
+       * Generate click-to-chat WhatsApp direct URL
+       */
+      export function getWhatsAppUrl(phone: string, message: string): string {
+        const cleanPhone = formatWhatsAppPhone(phone);
+        const encodedText = encodeURIComponent(message);
+        if (cleanPhone) {
+          return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
+        }
+        return `https://api.whatsapp.com/send?text=${encodedText}`;
+      }
