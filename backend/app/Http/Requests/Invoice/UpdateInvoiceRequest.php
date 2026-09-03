@@ -26,6 +26,7 @@ class UpdateInvoiceRequest extends FormRequest
 
             'project_code' => ['nullable', 'string', 'max:100'],
             'installment_label' => ['nullable', 'string', 'max:255'],
+            'project_total_value' => ['nullable', 'numeric', 'min:0'],
 
             'items' => 'sometimes|array|min:1',
             'items.*.name' => 'required_with:items|string',
@@ -54,6 +55,9 @@ class UpdateInvoiceRequest extends FormRequest
             'items.*.name.required_with' => 'Nama item wajib diisi.',
             'items.*.quantity.required_with' => 'Jumlah item wajib diisi.',
             'items.*.price.required_with' => 'Harga item wajib diisi.',
+
+            'project_total_value.numeric' => 'Total nilai kontrak project harus berupa angka.',
+            'project_total_value.min' => 'Total nilai kontrak project tidak boleh negatif.',
         ];
     }
 }

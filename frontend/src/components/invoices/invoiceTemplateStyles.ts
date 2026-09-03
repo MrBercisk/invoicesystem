@@ -12,7 +12,7 @@ export const getTemplateStyles = (t: Template): string => {
     body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11.5px; color: #18181b; background: white; -webkit-font-smoothing: antialiased; }
     .wrap { width: 210mm; padding: 20mm 22mm; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid #d4d4d8; }
-    .company-logo { max-height: 40px; max-width: 170px; object-fit: contain; margin-bottom: 8px; display: block; }
+    .company-logo { max-height: 50px; max-width: 213px; object-fit: contain; margin-bottom: 10px; display: block; }
     .company-name { font-size: 17px; font-weight: 700; color: #09090b; letter-spacing: -0.2px; }
     .company-info { font-size: 10px; color: #71717a; margin-top: 4px; line-height: 1.6; }
     .invoice-title { font-size: 10.5px; font-weight: 600; color: #52525b; letter-spacing: 1.2px; text-transform: uppercase; text-align: right; }
@@ -50,9 +50,9 @@ export const getTemplateStyles = (t: Template): string => {
     .signature-wrap { width: 210px; text-align: center; font-size: 10.5px; color: #52525b; }
     .signature-date { margin-bottom: 3px; font-size: 10px; color: #71717a; }
     .signature-company { font-weight: 600; color: #09090b; margin-bottom: 4px; font-size: 11px; }
-    .signature-box { position: relative; height: 76px; margin: 4px 0; display: flex; align-items: center; justify-content: center; }
-    .signature-img { position: relative; z-index: 2; max-width: 140px; max-height: 60px; object-fit: contain; }
-    .stamp-img { position: absolute; z-index: 1; width: 64px; height: 64px; object-fit: contain; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
+    .signature-box { position: relative; height: 95px; margin: 4px 0; display: flex; align-items: center; justify-content: center; }
+    .signature-img { position: relative; z-index: 2; max-width: 175px; max-height: 75px; object-fit: contain; }
+    .stamp-img { position: absolute; z-index: 1; width: 80px; height: 80px; object-fit: contain; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
     .signature-line { border-bottom: 1px solid #18181b; margin-top: 2px; padding-bottom: 2px; }
     .signer-name { font-weight: 700; color: #09090b; font-size: 11px; }
     .signer-title { font-size: 9.5px; color: #71717a; margin-top: 2px; }
@@ -68,7 +68,7 @@ export const getTemplateStyles = (t: Template): string => {
     body { font-family: 'Newsreader', Georgia, 'Times New Roman', serif; font-size: 11.5px; color: #1a1a1a; background: white; }
     .wrap { width: 210mm; padding: 20mm 22mm; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
-    .company-logo { max-height: 46px; max-width: 170px; object-fit: contain; margin-bottom: 8px; display: block; }
+    .company-logo { max-height: 57px; max-width: 213px; object-fit: contain; margin-bottom: 10px; display: block; }
     .company-name { font-size: 18px; font-weight: 700; color: #1a1a1a; }
     .company-info { font-size: 10.5px; color: #4b4b4b; margin-top: 3px; line-height: 1.5; font-family: sans-serif; }
     .invoice-title { font-size: 19px; font-weight: 600; color: #1a1a1a; text-align: right; letter-spacing: 1.5px; }
@@ -106,9 +106,9 @@ export const getTemplateStyles = (t: Template): string => {
     .signature-wrap { width: 210px; text-align: center; font-size: 10.5px; color: #1a1a1a; }
     .signature-date { margin-bottom: 3px; font-size: 10px; font-family: sans-serif; color: #4b4b4b; }
     .signature-company { font-weight: 500; margin-bottom: 4px; font-family: sans-serif; font-size: 10.5px; color: #4b4b4b; }
-    .signature-box { position: relative; height: 76px; margin: 4px 0; display: flex; align-items: center; justify-content: center; }
-    .signature-img { position: relative; z-index: 2; max-width: 140px; max-height: 60px; object-fit: contain; }
-    .stamp-img { position: absolute; z-index: 1; width: 64px; height: 64px; object-fit: contain; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
+    .signature-box { position: relative; height: 95px; margin: 4px 0; display: flex; align-items: center; justify-content: center; }
+    .signature-img { position: relative; z-index: 2; max-width: 175px; max-height: 75px; object-fit: contain; }
+    .stamp-img { position: absolute; z-index: 1; width: 80px; height: 80px; object-fit: contain; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
     .signature-line { border-bottom: 1px solid #1a1a1a; margin-top: 2px; padding-bottom: 2px; }
     .signer-name { font-weight: 700; color: #1a1a1a; font-size: 11.5px; }
     .signer-title { font-size: 9.5px; color: #4b4b4b; margin-top: 2px; font-family: sans-serif; }
@@ -125,7 +125,7 @@ export const getTemplateStyles = (t: Template): string => {
     body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; color: #18181b; background: white; -webkit-font-smoothing: antialiased; }
     .wrap { width: 210mm; margin: 0 auto; }
     .header-bg { background: #17171a; padding: 26px 28px 22px; color: white; border-bottom: 2px solid #7f1d1d; }
-    .company-logo { max-height: 38px; max-width: 160px; object-fit: contain; margin-bottom: 10px; display: block; }
+    .company-logo { max-height: 47px; max-width: 200px; object-fit: contain; margin-bottom: 12px; display: block; }
     .company-name { font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.2px; }
     .company-info { font-size: 9.5px; color: #a1a1aa; margin-top: 4px; line-height: 1.5; }
     .invoice-title { font-size: 10px; font-weight: 600; color: #d4a5ab; letter-spacing: 1.5px; text-transform: uppercase; text-align: right; }
@@ -164,9 +164,9 @@ export const getTemplateStyles = (t: Template): string => {
     .signature-wrap { width: 210px; text-align: center; font-size: 10px; color: #52525b; }
     .signature-date { margin-bottom: 3px; font-size: 9.5px; color: #71717a; }
     .signature-company { font-weight: 600; color: #09090b; margin-bottom: 4px; font-size: 10.5px; }
-    .signature-box { position: relative; height: 74px; margin: 4px 0; display: flex; align-items: center; justify-content: center; }
-    .signature-img { position: relative; z-index: 2; max-width: 140px; max-height: 60px; object-fit: contain; }
-    .stamp-img { position: absolute; z-index: 1; width: 64px; height: 64px; object-fit: contain; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
+    .signature-box { position: relative; height: 92px; margin: 4px 0; display: flex; align-items: center; justify-content: center; }
+    .signature-img { position: relative; z-index: 2; max-width: 175px; max-height: 75px; object-fit: contain; }
+    .stamp-img { position: absolute; z-index: 1; width: 80px; height: 80px; object-fit: contain; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
     .signature-line { border-bottom: 1px solid #18181b; margin-top: 2px; padding-bottom: 2px; }
     .signer-name { font-weight: 700; color: #09090b; font-size: 10.5px; }
     .signer-title { font-size: 9px; color: #71717a; margin-top: 2px; }

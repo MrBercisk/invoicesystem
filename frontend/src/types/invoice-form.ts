@@ -28,4 +28,6 @@ export interface InvoiceFormData {
   installment_label?: string;
 
   items: InvoiceFormItem[];
+
+  project_total_value?: number;
 }

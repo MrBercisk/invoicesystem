@@ -289,4 +289,15 @@ export const invoicesApi = {
 
   delete: (id: number) =>
     api.delete(`/invoices/${id}`),
+
+  getPdfUrl: async (
+    id: number,
+    template: 'minimalis' | 'formal' | 'gradient' = 'minimalis'
+  ): Promise<string> => {
+    const res = await api.get(`/invoices/${id}/pdf-url`, {
+      params: { template },
+    });
+
+    return res.data.url;
+  },
 };

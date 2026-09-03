@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Building2,
   Users,
-  MessageCircle,
   FolderKanban,
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
@@ -128,13 +127,13 @@ export function InvoiceDetailPage() {
             </button>
           )}
 
-          <button
+          {/* <button
             onClick={() => setWaModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg transition-colors shadow-xs cursor-pointer"
             title="Kirim Ringkasan Faktur via WhatsApp (1-Klik)"
           >
             <MessageCircle size={13} className="stroke-[2.5]" /> Kirim WA
-          </button>
+          </button> */}
 
           <Link
             to={`/invoices/${invoice.id}/edit`}

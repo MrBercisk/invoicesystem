@@ -46,5 +46,9 @@ export interface Invoice {
   project_code?: string;
   installment_label?: string;
 
+  project_total_value?: number;
+
+  pdf_url?: string;
+
   created_at: string;
 }

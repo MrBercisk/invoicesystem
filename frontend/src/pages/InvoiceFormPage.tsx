@@ -8,6 +8,7 @@ import {
   companiesApi,
   clientsApi,
   productsApi,
+  type InvoiceProject,
 } from '../lib/api';
 
 import type { InvoiceItem, InvoiceFormData } from '../types';
@@ -76,8 +77,9 @@ export function InvoiceFormPage() {
 
       project_code: '',
       installment_label: '',
+      project_total_value: undefined,
 
-      tax_rate: 11,
+      tax_rate: 0,
       discount: 0,
 
       notes:
@@ -98,7 +100,7 @@ export function InvoiceFormPage() {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'items',
   });
@@ -114,6 +116,10 @@ export function InvoiceFormPage() {
 
         project_code: existingInvoice.project_code || '',
         installment_label: existingInvoice.installment_label || '',
+        // Nilai kontrak hanya relevan untuk invoice pertama sebuah project
+        // (yang menyimpannya). Saat edit invoice termin lanjutan, field ini
+        // memang akan kosong — itu perilaku yang benar, bukan bug.
+        project_total_value: existingInvoice.project_total_value ?? undefined,
 
         tax_rate: existingInvoice.tax_rate,
         discount: existingInvoice.discount,
@@ -209,6 +215,52 @@ export function InvoiceFormPage() {
     );
   };
 
+  const handleProjectAutoFillItems = (
+    project: InvoiceProject,
+  ) => {
+    if (project.remaining_total <= 0) {
+      alert(
+        'Project ini sudah lunas (sisa tagihan Rp 0). Periksa kembali sebelum membuat invoice baru untuk project ini.',
+      );
+      return;
+    }
+
+    const currentItems = watch('items') || [];
+
+    const isPristine =
+      currentItems.length === 1 &&
+      !currentItems[0]?.name?.trim() &&
+      Number(currentItems[0]?.price) === 0;
+
+    const applyAutoFill = () => {
+      const nextInstallment = project.invoice_count + 1;
+
+      replace([
+        {
+          name: `Termin ${nextInstallment} — Pelunasan Project ${project.project_code}`,
+          description:
+            'Nominal diambil langsung dari sisa tagihan project. Sesuaikan kembali jika diperlukan.',
+          quantity: 1,
+          unit: 'paket',
+          price: Math.round(project.remaining_total),
+        },
+      ]);
+    };
+
+    if (isPristine) {
+      applyAutoFill();
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Rincian Barang & Jasa saat ini akan diganti dengan item otomatis berdasarkan sisa tagihan project. Lanjutkan?',
+    );
+
+    if (confirmed) {
+      applyAutoFill();
+    }
+  };
+
   const saveMutation = useMutation({
     mutationFn: (data: InvoiceFormData) => {
       const payload = {
@@ -219,6 +271,13 @@ export function InvoiceFormPage() {
 
         tax_rate: Number(data.tax_rate) || 0,
         discount: Number(data.discount) || 0,
+
+        project_total_value:
+          data.project_total_value !== undefined &&
+          data.project_total_value !== null &&
+          !Number.isNaN(Number(data.project_total_value))
+            ? Number(data.project_total_value)
+            : undefined,
 
         items: data.items.map((item) => ({
           ...item,
@@ -303,6 +362,7 @@ export function InvoiceFormPage() {
         watch={watch}
         setValue={setValue}
         isEditing={isEditing}
+        onProjectSelect={handleProjectAutoFillItems}
       />
 
       <InvoiceItemsSection
@@ -318,6 +378,8 @@ export function InvoiceFormPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <InvoiceNotesSection
           register={register}
+          setValue={setValue}
+          watch={watch}
           total={total}
         />
 

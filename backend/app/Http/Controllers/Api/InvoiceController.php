@@ -48,24 +48,17 @@ class InvoiceController extends Controller
         // Project baru jika invoice memiliki installment label
         // tetapi belum memiliki project code, generate otomatis.
         // Jika project code sudah ada, gunakan kode tersebut.
-        if (
-            !empty($data['installment_label']) &&
-            empty($data['project_code'])
-        ) {
+       if (!empty($data['installment_label']) && empty($data['project_code'])) {
             do {
-                $projectCode =
-                    'PRJ-' .
-                    now()->format('Ymd') .
-                    '-' .
-                    strtoupper(Str::random(4));
-            } while (
-                Invoice::where(
-                    'project_code',
-                    $projectCode
-                )->exists()
-            );
+                $projectCode = 'PRJ-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
+            } while (Invoice::where('project_code', $projectCode)->exists());
 
             $data['project_code'] = $projectCode;
+            // project_total_value dari request akan tersimpan di invoice pertama ini — OK.
+        } else {
+            // Ini termin lanjutan dari project yang sudah ada:
+            // jangan biarkan user tidak sengaja menimpa nilai kontrak project.
+            unset($data['project_total_value']);
         }
 
         $invoice = Invoice::create([
@@ -101,6 +94,16 @@ class InvoiceController extends Controller
     public function update(UpdateInvoiceRequest $request, Invoice $invoice): JsonResponse
     {
         $data = $request->validated();
+
+        // Cegah perubahan nilai kontrak project kalau project sudah
+        // punya invoice lain, supaya termin yang sudah dibuat tidak jadi rancu
+        if (
+            array_key_exists('project_total_value', $data) &&
+            $invoice->project_code &&
+            $invoice->siblingInvoices()->exists()
+        ) {
+            unset($data['project_total_value']);
+        }
 
         $invoice->update($data);
 
@@ -155,20 +158,26 @@ class InvoiceController extends Controller
                 'invoice_date',
                 'status',
                 'total',
+                'project_total_value', 
             ])
             ->orderBy('invoice_date')
             ->get()
             ->groupBy('project_code')
             ->map(function ($invoices, $projectCode) {
-                $projectTotal = $invoices->sum(
-                    fn ($invoice) => (float) $invoice->total
-                );
+                // Nilai kontrak: ambil dari invoice manapun dalam project ini
+                // yang punya project_total_value terisi (biasanya termin pertama).
+                // Fallback ke sum(total) untuk project lama sebelum fitur ini ada.
+                $explicitTotal = $invoices
+                    ->whereNotNull('project_total_value')
+                    ->first()?->project_total_value;
+
+                $projectTotal = $explicitTotal !== null
+                    ? (float) $explicitTotal
+                    : $invoices->sum(fn ($invoice) => (float) $invoice->total);
 
                 $paidTotal = $invoices
                     ->where('status', 'paid')
-                    ->sum(
-                        fn ($invoice) => (float) $invoice->total
-                    );
+                    ->sum(fn ($invoice) => (float) $invoice->total);
 
                 return [
                     'project_code' => $projectCode,
@@ -180,16 +189,11 @@ class InvoiceController extends Controller
                     'invoices' => $invoices->map(
                         fn ($invoice) => [
                             'id' => $invoice->id,
-                            'invoice_number' =>
-                                $invoice->invoice_number,
-                            'installment_label' =>
-                                $invoice->installment_label,
-                            'invoice_date' =>
-                                $invoice->invoice_date,
-                            'status' =>
-                                $invoice->status,
-                            'total' =>
-                                (float) $invoice->total,
+                            'invoice_number' => $invoice->invoice_number,
+                            'installment_label' => $invoice->installment_label,
+                            'invoice_date' => $invoice->invoice_date,
+                            'status' => $invoice->status,
+                            'total' => (float) $invoice->total,
                         ]
                     )->values(),
                 ];
@@ -198,4 +202,17 @@ class InvoiceController extends Controller
 
         return ApiResponse::success($projects);
     }
+    public function pdfUrl(Request $request, Invoice $invoice): JsonResponse
+    {
+        $request->validate([
+            'template' => ['nullable', 'in:minimalis,formal,gradient'],
+        ]);
+
+        $template = $request->input('template', 'minimalis');
+
+        return ApiResponse::success([
+            'url' => $invoice->pdfUrl($template),
+        ]);
+    }
+    
 }

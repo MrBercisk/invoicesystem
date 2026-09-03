@@ -14,30 +14,53 @@ export function PreviewFormal({ invoice, formatRupiah, formatDate }: Props) {
   return (
     <div className="relative overflow-hidden bg-white border border-neutral-300 p-8 sm:p-12 text-neutral-900 max-w-[210mm] mx-auto font-serif-invoice">
       {status === 'draft' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute z-20 pointer-events-none select-none" style={{ top: '53%', left: '30%' }}>
           <span
             className="font-bold uppercase text-neutral-300"
-            style={{ fontSize: '110px', letterSpacing: '14px', transform: 'rotate(-28deg)', opacity: 0.4 }}
+            style={{
+              fontSize: '60px',
+              letterSpacing: '8px',
+              transform: 'translate(-50%, -50%) rotate(-28deg)',
+              opacity: 0.4,
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
           >
             Draft
           </span>
         </div>
       )}
       {status === 'paid' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute z-20 pointer-events-none select-none" style={{ top: '53%', left: '30%' }}>
           <div
-            className="border-[6px] border-emerald-700 text-emerald-700 font-bold uppercase px-8 py-3"
-            style={{ fontSize: '44px', letterSpacing: '8px', transform: 'rotate(-14deg)', opacity: 0.5 }}
+            className="border-[3px] border-emerald-700 text-emerald-700 font-bold uppercase"
+            style={{
+              fontSize: '22px',
+              letterSpacing: '4px',
+              padding: '6px 16px',
+              transform: 'translate(-50%, -50%) rotate(-14deg)',
+              opacity: 0.5,
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
           >
             Lunas
           </div>
         </div>
       )}
       {status === 'cancelled' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute z-20 pointer-events-none select-none" style={{ top: '53%', left: '30%' }}>
           <div
-            className="border-[6px] border-red-700 text-red-700 font-bold uppercase px-6 py-3"
-            style={{ fontSize: '38px', letterSpacing: '6px', transform: 'rotate(-14deg)', opacity: 0.5 }}
+            className="border-[3px] border-red-700 text-red-700 font-bold uppercase"
+            style={{
+              fontSize: '19px',
+              letterSpacing: '3px',
+              padding: '6px 12px',
+              transform: 'translate(-50%, -50%) rotate(-14deg)',
+              opacity: 0.5,
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
           >
             Dibatalkan
           </div>
@@ -51,7 +74,7 @@ export function PreviewFormal({ invoice, formatRupiah, formatDate }: Props) {
             <img
               src={invoice.company.logo}
               alt={invoice.company.name}
-              className="max-h-11 max-w-[190px] object-contain mb-3"
+              className="max-h-[55px] max-w-[238px] object-contain mb-3"
             />
           )}
           <h1 className="text-xl font-bold text-neutral-900">{invoice.company.name}</h1>
@@ -222,19 +245,19 @@ export function PreviewFormal({ invoice, formatRupiah, formatDate }: Props) {
           </div>
           <div className="text-neutral-700 mb-1">Hormat kami,</div>
 
-          <div className="relative h-20 flex items-center justify-center my-1">
+          <div className="relative h-[100px] flex items-center justify-center my-1">
             {invoice.company.stamp && (
               <img
                 src={invoice.company.stamp}
                 alt="Stempel Perusahaan"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 object-contain opacity-70 pointer-events-none select-none z-0"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-20 w-20 object-contain opacity-70 pointer-events-none select-none z-0"
               />
             )}
             {invoice.company.signature ? (
               <img
                 src={invoice.company.signature}
                 alt="Tanda Tangan"
-                className="max-h-16 max-w-[140px] object-contain relative z-10"
+                className="max-h-20 max-w-[175px] object-contain relative z-10"
               />
             ) : (
               <div className="h-14" />

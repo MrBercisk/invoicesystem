@@ -13,7 +13,7 @@ import type {
   UseFormWatch,
 } from 'react-hook-form';
 
-import { invoicesApi } from '../../lib/api';
+import { invoicesApi, type InvoiceProject } from '../../lib/api';
 
 import type { InvoiceFormData } from '../../types';
 
@@ -22,6 +22,7 @@ interface InvoicePaymentSectionProps {
   watch: UseFormWatch<InvoiceFormData>;
   setValue: UseFormSetValue<InvoiceFormData>;
   isEditing: boolean;
+  onProjectSelect?: (project: InvoiceProject) => void;
 }
 
 type PaymentMode = 'full' | 'installment';
@@ -32,9 +33,11 @@ export default function InvoicePaymentSection({
   watch,
   setValue,
   isEditing,
+  onProjectSelect,
 }: InvoicePaymentSectionProps) {
   const projectCode = watch('project_code');
   const installmentLabel = watch('installment_label');
+  const projectTotalValue = watch('project_total_value');
   const companyId = Number(watch('company_id'));
   const clientId = Number(watch('client_id'));
 
@@ -128,6 +131,7 @@ export default function InvoicePaymentSection({
     if (mode === 'full') {
       setValue('project_code', '');
       setValue('installment_label', '');
+      setValue('project_total_value', undefined);
       setProjectMode('new');
 
       return;
@@ -161,8 +165,12 @@ export default function InvoicePaymentSection({
       return;
     }
 
+    // Pindah ke "Lanjutkan Project": nilai kontrak hanya berlaku
+    // untuk project baru (termin pertama), jadi kosongkan supaya
+    // tidak tertukar dengan project yang sudah punya nilai kontrak sendiri.
     setValue('project_code', '');
     setValue('installment_label', '');
+    setValue('project_total_value', undefined);
   };
 
   const handleProjectSelect = (
@@ -186,6 +194,8 @@ export default function InvoicePaymentSection({
         'installment_label',
         `Termin ${nextInstallment}`,
       );
+
+      onProjectSelect?.(project);
     }
   };
 
@@ -463,7 +473,7 @@ export default function InvoicePaymentSection({
 
             {/* New Project */}
             {projectMode === 'new' && (
-              <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                     <svg
@@ -493,6 +503,51 @@ export default function InvoicePaymentSection({
                       project secara manual.
                     </p>
                   </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
+                  <label
+                    htmlFor="project_total_value"
+                    className="mb-1.5 block text-xs font-medium text-slate-700"
+                  >
+                    Total Nilai Kontrak Project{' '}
+                    <span className="text-rose-500">*</span>
+                  </label>
+
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-medium text-slate-400">
+                      Rp
+                    </span>
+
+                    <input
+                      id="project_total_value"
+                      type="number"
+                      min="0"
+                      step="any"
+                      placeholder="3500000"
+                      {...register('project_total_value', {
+                        valueAsNumber: true,
+                      })}
+                      className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    />
+                  </div>
+
+                  <p className="mt-1.5 text-[11px] text-slate-400">
+                    Ini nilai kontrak keseluruhan project (bukan nominal
+                    invoice ini saja). Termin berikutnya akan otomatis
+                    menghitung sisa tagihan berdasarkan angka ini — jadi
+                    isi dengan total harga project, misalnya total kontrak
+                    pembuatan website Rp 3.500.000.
+                  </p>
+
+                  {Boolean(projectTotalValue) && (
+                    <p className="mt-2 text-[11px] font-medium text-slate-600">
+                      Nilai kontrak akan disimpan sebagai Rp{' '}
+                      {Number(projectTotalValue).toLocaleString('id-ID')}.
+                      Sisa tagihan akan tampil otomatis saat kamu membuat
+                      invoice termin berikutnya untuk project ini.
+                    </p>
+                  )}
                 </div>
               </div>
             )}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
   Send, 
@@ -12,7 +12,9 @@ import {
   BellRing,
   FileText,
   AlignLeft,
-  Building2
+  Building2,
+  FileDown,
+  Loader2
 } from 'lucide-react';
 import type { Invoice } from '../types';
 import { 
@@ -21,11 +23,19 @@ import {
   formatWhatsAppPhone,
   type WhatsAppTemplateType 
 } from '../lib/whatsapp';
+import { invoicesApi } from '../lib/api';
+import type { Template as PdfTemplate } from './invoices/invoiceTemplateStyles';
 
 interface WhatsAppShareModalProps {
   invoice: Invoice;
   isOpen: boolean;
   onClose: () => void;
+  /**
+   * Template desain PDF yang sedang aktif dipilih di InvoicePreview
+   * (minimalis / formal / gradient). Dipakai supaya link PDF yang
+   * dikirim ke WhatsApp konsisten dengan tampilan yang lagi dilihat user.
+   */
+  pdfTemplate?: PdfTemplate;
 }
 
 const TEMPLATES: { id: WhatsAppTemplateType; label: string; icon: typeof FileText; desc: string }[] = [
@@ -35,22 +45,56 @@ const TEMPLATES: { id: WhatsAppTemplateType; label: string; icon: typeof FileTex
   { id: 'short', label: 'Pesan Ringkas', icon: AlignLeft, desc: 'To-the-point untuk komunikasi cepat' },
 ];
 
-export function WhatsAppShareModal({ invoice, isOpen, onClose }: WhatsAppShareModalProps) {
+export function WhatsAppShareModal({ invoice, isOpen, onClose, pdfTemplate = 'minimalis' }: WhatsAppShareModalProps) {
   // Pre-select template based on invoice status
   const defaultTemplate: WhatsAppTemplateType = invoice.status === 'paid' ? 'receipt' : 'standard';
   
   const [templateType, setTemplateType] = useState<WhatsAppTemplateType>(defaultTemplate);
   const [phone, setPhone] = useState(invoice.client?.phone || '');
   const [includeBankInfo, setIncludeBankInfo] = useState(true);
+  const [includePdfLink, setIncludePdfLink] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfUrlLoading, setPdfUrlLoading] = useState(false);
+  const [pdfUrlError, setPdfUrlError] = useState(false);
+
+  // Fetch signed PDF URL sesuai template desain yang sedang aktif,
+  // setiap kali modal dibuka atau invoice/template-nya berganti.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let cancelled = false;
+    setPdfUrlLoading(true);
+    setPdfUrlError(false);
+
+    invoicesApi
+      .getPdfUrl(invoice.id, pdfTemplate)
+      .then((url) => {
+        if (!cancelled) setPdfUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setPdfUrlError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setPdfUrlLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, invoice.id, pdfTemplate]);
+
+  const hasPdfUrl = Boolean(pdfUrl);
 
   // Generate message text dynamically
   const messageText = useMemo(() => {
     return generateWhatsAppMessage(invoice, {
       templateType,
       includeBankInfo,
+      pdfUrl: hasPdfUrl && includePdfLink ? pdfUrl! : undefined,
     });
-  }, [invoice, templateType, includeBankInfo]);
+  }, [invoice, templateType, includeBankInfo, includePdfLink, hasPdfUrl, pdfUrl]);
 
   if (!isOpen) return null;
 
@@ -173,19 +217,51 @@ export function WhatsAppShareModal({ invoice, isOpen, onClose }: WhatsAppShareMo
             </div>
           </div>
 
-          {/* 3. Message Options Checkbox */}
-          <div className="flex items-center gap-2 p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
-            <input
-              type="checkbox"
-              id="includeBank"
-              checked={includeBankInfo}
-              onChange={(e) => setIncludeBankInfo(e.target.checked)}
-              className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer w-4 h-4"
-            />
-            <label htmlFor="includeBank" className="text-xs text-zinc-700 cursor-pointer select-none font-medium flex items-center gap-1.5">
-              <Building2 size={13} className="text-zinc-500" />
-              Sertakan info rekening bank penerbit ({invoice.company?.bank_name || 'Bank'} - {invoice.company?.bank_account_number || 'Rekening'})
-            </label>
+          {/* 3. Message Options Checkboxes */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="includeBank"
+                checked={includeBankInfo}
+                onChange={(e) => setIncludeBankInfo(e.target.checked)}
+                className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer w-4 h-4"
+              />
+              <label htmlFor="includeBank" className="text-xs text-zinc-700 cursor-pointer select-none font-medium flex items-center gap-1.5">
+                <Building2 size={13} className="text-zinc-500" />
+                Sertakan info rekening bank penerbit ({invoice.company?.bank_name || 'Bank'} - {invoice.company?.bank_account_number || 'Rekening'})
+              </label>
+            </div>
+
+            {pdfUrlLoading ? (
+              <div className="flex items-center gap-2 p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-500">
+                <Loader2 size={13} className="animate-spin" />
+                <span className="text-[11px]">Menyiapkan link PDF ({pdfTemplate})...</span>
+              </div>
+            ) : hasPdfUrl ? (
+              <div className="flex items-center gap-2 p-2.5 bg-zinc-50 border border-zinc-200 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="includePdf"
+                  checked={includePdfLink}
+                  onChange={(e) => setIncludePdfLink(e.target.checked)}
+                  className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer w-4 h-4"
+                />
+                <label htmlFor="includePdf" className="text-xs text-zinc-700 cursor-pointer select-none font-medium flex items-center gap-1.5">
+                  <FileDown size={13} className="text-zinc-500" />
+                  Sertakan link untuk lihat/cetak PDF faktur
+                </label>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                <FileDown size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-amber-700 leading-snug">
+                  {pdfUrlError
+                    ? 'Gagal membuat link PDF. Coba tutup dan buka lagi modal ini.'
+                    : 'Link PDF belum tersedia untuk faktur ini. Simpan faktur terlebih dahulu agar link bisa dibuat.'}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* 4. Live WhatsApp Bubble Preview */}

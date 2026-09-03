@@ -14,30 +14,53 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
   return (
     <div className="relative overflow-hidden bg-white border border-zinc-200 text-zinc-900 max-w-[210mm] mx-auto">
       {status === 'draft' && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute z-30 pointer-events-none select-none" style={{ top: '53%', left: '30%' }}>
           <span
-            className="font-extrabold uppercase text-zinc-400"
-            style={{ fontSize: '110px', letterSpacing: '14px', transform: 'rotate(-28deg)', opacity: 0.3 }}
+            className="font-bold uppercase text-zinc-400"
+            style={{
+              fontSize: '60px',
+              letterSpacing: '8px',
+              transform: 'translate(-50%, -50%) rotate(-28deg)',
+              opacity: 0.4,
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
           >
             Draft
           </span>
         </div>
       )}
       {status === 'paid' && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute z-30 pointer-events-none select-none" style={{ top: '53%', left: '30%' }}>
           <div
-            className="border-[6px] border-emerald-500 text-emerald-500 font-extrabold uppercase px-8 py-3 rounded-md"
-            style={{ fontSize: '44px', letterSpacing: '8px', transform: 'rotate(-14deg)', opacity: 0.6 }}
+            className="border-[3px] border-emerald-500 text-emerald-500 font-bold uppercase rounded-md"
+            style={{
+              fontSize: '22px',
+              letterSpacing: '4px',
+              padding: '6px 16px',
+              transform: 'translate(-50%, -50%) rotate(-14deg)',
+              opacity: 0.5,
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
           >
             Lunas
           </div>
         </div>
       )}
       {status === 'cancelled' && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute z-30 pointer-events-none select-none" style={{ top: '53%', left: '30%' }}>
           <div
-            className="border-[6px] border-red-500 text-red-500 font-extrabold uppercase px-6 py-3 rounded-md"
-            style={{ fontSize: '38px', letterSpacing: '6px', transform: 'rotate(-14deg)', opacity: 0.6 }}
+            className="border-[3px] border-red-500 text-red-500 font-bold uppercase rounded-md"
+            style={{
+              fontSize: '19px',
+              letterSpacing: '3px',
+              padding: '6px 12px',
+              transform: 'translate(-50%, -50%) rotate(-14deg)',
+              opacity: 0.5,
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+            }}
           >
             Dibatalkan
           </div>
@@ -52,7 +75,7 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
               <img
                 src={invoice.company.logo}
                 alt={invoice.company.name}
-                className="max-h-9 max-w-[170px] object-contain mb-3"
+                className="max-h-[45px] max-w-[213px] object-contain mb-3"
               />
             )}
             <h1 className="text-lg font-bold text-white tracking-tight">{invoice.company.name}</h1>
@@ -222,19 +245,19 @@ export function PreviewGradient({ invoice, formatRupiah, formatDate }: Props) {
             </div>
             <div className="font-semibold text-zinc-950 mb-1">Hormat kami,</div>
 
-            <div className="relative h-20 flex items-center justify-center my-1">
+            <div className="relative h-[100px] flex items-center justify-center my-1">
               {invoice.company.stamp && (
                 <img
                   src={invoice.company.stamp}
                   alt="Stempel Perusahaan"
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 object-contain opacity-70 pointer-events-none select-none z-0"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-20 w-20 object-contain opacity-70 pointer-events-none select-none z-0"
                 />
               )}
               {invoice.company.signature ? (
                 <img
                   src={invoice.company.signature}
                   alt="Tanda Tangan"
-                  className="max-h-16 max-w-[140px] object-contain relative z-10"
+                  className="max-h-20 max-w-[175px] object-contain relative z-10"
                 />
               ) : (
                 <div className="h-14" />

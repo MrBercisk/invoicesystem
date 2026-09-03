@@ -31,6 +31,7 @@ class StoreInvoiceRequest extends FormRequest
             'items.*.product_id'   => 'nullable|exists:products,id',
             'project_code' => ['nullable', 'string', 'max:100'],
             'installment_label' => ['nullable', 'string', 'max:255'],
+            'project_total_value' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 
@@ -62,6 +63,9 @@ class StoreInvoiceRequest extends FormRequest
 
             'installment_label.string' => 'Label termin harus berupa teks.',
             'installment_label.max' => 'Label termin maksimal 255 karakter.',
+
+            'project_total_value.numeric' => 'Total nilai kontrak project harus berupa angka.',
+            'project_total_value.min' => 'Total nilai kontrak project tidak boleh negatif.',
         ];
     }
 }

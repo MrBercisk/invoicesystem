@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\URL;
 
 class Invoice extends Model {
     use SoftDeletes;
@@ -14,8 +15,9 @@ class Invoice extends Model {
         'invoice_date', 'due_date', 'status',
         'subtotal', 'tax_rate', 'tax_amount', 'discount', 'total',
         'notes', 'terms',
-        'project_code', 'installment_label',
+        'project_code', 'installment_label','project_total_value',
     ];
+    protected $appends = ['pdf_url'];
 
     protected $casts = [
         'invoice_date' => 'date',
@@ -25,6 +27,7 @@ class Invoice extends Model {
         'tax_amount'   => 'float',
         'discount'     => 'float',
         'total'        => 'float',
+        'project_total_value' => 'float',
     ];
 
     public function company(): BelongsTo {
@@ -89,7 +92,14 @@ class Invoice extends Model {
         if (!$this->project_code) {
             return $this->total;
         }
-        return $this->total + $this->siblingInvoices()->sum('total');
+
+        $explicit = static::where('project_code', $this->project_code)
+            ->whereNotNull('project_total_value')
+            ->value('project_total_value');
+
+        return $explicit !== null
+            ? (float) $explicit
+            : $this->total + $this->siblingInvoices()->sum('total'); // fallback data lama
     }
 
     /**
@@ -108,5 +118,18 @@ class Invoice extends Model {
     public function getRemainingAttribute(): float {
         $paidIncludingSelf = $this->already_paid + ($this->status === 'paid' ? $this->total : 0);
         return $this->project_total - $paidIncludingSelf;
+    }
+
+    public function pdfUrl(string $template = 'minimalis'): string
+    {
+        return URL::signedRoute('invoices.pdf.public', [
+            'invoice' => $this->id,
+            'template' => $template,
+        ]);
+    }
+
+    public function getPdfUrlAttribute(): string
+    {
+        return $this->pdfUrl('minimalis');
     }
 }

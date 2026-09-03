@@ -11,7 +11,6 @@ import {
   FileText, 
   X,
   Printer,
-  MessageCircle
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
 import { formatRupiah, formatDate } from '../lib/terbilang';
@@ -212,13 +211,13 @@ export function InvoicesPage() {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button
+                        {/* <button
                           onClick={() => setWaInvoice(invoice)}
                           className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition-colors"
                           title="Kirim via WhatsApp (1-Klik)"
                         >
                           <MessageCircle size={15} />
-                        </button>
+                        </button> */}
                         <button
                           onClick={() => setPreviewInvoice(invoice)}
                           className="p-1.5 text-slate-600 hover:text-slate-950 hover:bg-slate-100 rounded-md transition-colors"

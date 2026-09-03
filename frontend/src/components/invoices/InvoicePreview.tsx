@@ -30,6 +30,63 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
+  const buildStatusWatermarkHtml = (status: InvoiceStatus): string => {
+    if (status === 'draft') {
+      return `<div class="status-watermark status-watermark--draft">DRAFT</div>`;
+    }
+    if (status === 'paid') {
+      return `<div class="status-watermark status-watermark--paid">LUNAS</div>`;
+    }
+    if (status === 'cancelled') {
+      return `<div class="status-watermark status-watermark--cancelled">DIBATALKAN</div>`;
+    }
+    return '';
+  };
+
+  const STATUS_WATERMARK_CSS = `
+    .status-watermark {
+      position: fixed;
+      top: 50%;
+      left: 30%;
+      transform: translate(-50%, -50%) rotate(-14deg);
+      z-index: 999;
+      pointer-events: none;
+      user-select: none;
+      text-transform: uppercase;
+      font-weight: 700;
+      white-space: nowrap;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .status-watermark--draft {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 60px;
+      letter-spacing: 8px;
+      color: #d4d4d8;
+      opacity: 0.4;
+      transform: translate(-50%, -50%) rotate(-28deg);
+    }
+    .status-watermark--paid {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      letter-spacing: 4px;
+      color: #047857;
+      border: 3px solid #047857;
+      padding: 6px 16px;
+      opacity: 0.5;
+      transform: translate(-50%, -50%) rotate(-14deg);
+    }
+    .status-watermark--cancelled {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 19px;
+      letter-spacing: 3px;
+      color: #b91c1c;
+      border: 3px solid #b91c1c;
+      padding: 6px 12px;
+      opacity: 0.5;
+      transform: translate(-50%, -50%) rotate(-14deg);
+    }
+  `;
   const buildInvoiceHTML = (t: Template): string => {
     const styles = getTemplateStyles(t);
     const isFormal = t === 'formal';
@@ -115,9 +172,10 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <style>${styles}</style>
+        <style>${styles}${STATUS_WATERMARK_CSS}</style>
       </head>
       <body>
+      ${buildStatusWatermarkHtml(invoice.status)}
       ${headerSection}
 
         ${invoice.project_code || invoice.installment_label ? `
@@ -354,6 +412,7 @@ export function InvoicePreview({ invoice, onStatusChange }: Props) {
         invoice={invoice}
         isOpen={waModalOpen}
         onClose={() => setWaModalOpen(false)}
+        pdfTemplate={template}
       />
     </div>
   );

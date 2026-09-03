@@ -71,6 +71,7 @@ export default function InvoiceItemRow({
           </label>
 
           <select
+            value={watchedItem?.product_id ?? ''}
             onChange={(event) => {
               if (event.target.value) {
                 onProductSelect(
@@ -80,7 +81,6 @@ export default function InvoiceItemRow({
               }
             }}
             className="w-full text-xs bg-white border border-slate-200 rounded-md p-1.5 text-slate-700"
-            defaultValue=""
           >
             <option value="">
               -- Pilih dari katalog --
@@ -92,9 +92,7 @@ export default function InvoiceItemRow({
                 value={product.id}
               >
                 {product.name} (
-                {formatRupiah(
-                  product.price
-                )}
+                {formatRupiah(product.price)}
                 /{product.unit || 'pcs'})
               </option>
             ))}
