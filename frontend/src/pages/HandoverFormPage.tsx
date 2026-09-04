@@ -25,6 +25,7 @@ export function HandoverFormPage() {
   const [handoverByTitle, setHandoverByTitle] = useState('');
   const [receivedByName, setReceivedByName] = useState('');
   const [receivedByTitle, setReceivedByTitle] = useState('');
+  const [warrantyDays, setWarrantyDays] = useState<number | ''>('');
 
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState(
@@ -53,6 +54,7 @@ export function HandoverFormPage() {
       setHandoverByTitle(doc.handover_by_title || '');
       setReceivedByName(doc.received_by_name || '');
       setReceivedByTitle(doc.received_by_title || '');
+      setWarrantyDays(doc.warranty_days ?? '');
       setNotes(doc.notes || '');
       setTerms(doc.terms || '');
       setItems(doc.items);
@@ -70,6 +72,12 @@ export function HandoverFormPage() {
       setInvoices(res.data.filter((inv) => inv.client_id === clientId));
     });
   }, [clientId]);
+
+  // TAMBAHAN: company yang sedang dipilih, dipakai untuk business_type-nya.
+  // Dihitung dari list `companies` (bukan dari `doc.company` hasil GET) supaya
+  // tetap live-update begitu user ganti pilihan company di dropdown, baik saat
+  // create maupun edit.
+  const selectedCompany = companies.find((c) => c.id === companyId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,6 +101,7 @@ export function HandoverFormPage() {
       handover_by_title: handoverByTitle,
       received_by_name: receivedByName,
       received_by_title: receivedByTitle,
+      warranty_days: warrantyDays === '' ? null : warrantyDays,
       notes,
       terms,
       items,
@@ -205,12 +214,40 @@ export function HandoverFormPage() {
                 className="w-full px-3 py-2 text-xs border border-zinc-300 rounded-lg outline-hidden focus:ring-2 focus:ring-emerald-500"
               />
             </div>
+
+            {/* TAMBAHAN: input Masa Garansi */}
+            <div>
+              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">
+                Masa Garansi (hari) <span className="text-zinc-400 font-normal">(opsional)</span>
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={65535}
+                placeholder="Contoh: 30"
+                value={warrantyDays}
+                onChange={(e) => setWarrantyDays(e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full px-3 py-2 text-xs border border-zinc-300 rounded-lg outline-hidden focus:ring-2 focus:ring-emerald-500"
+              />
+              <p className="mt-1 text-[10px] text-zinc-400">
+                Kosongkan jika barang/pekerjaan tidak memiliki masa garansi.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* ── Daftar Item ── */}
         <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-5">
-          <HandoverItemsEditor items={items} onChange={setItems} />
+          {!companyId && (
+            <p className="mb-3 text-[11px] text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              Pilih perusahaan terlebih dahulu agar label kolom (mis. "Nama Fitur" vs "Nama Produk") sesuai jenis bisnisnya.
+            </p>
+          )}
+          <HandoverItemsEditor
+            items={items}
+            onChange={setItems}
+            businessType={selectedCompany?.business_type}
+          />
         </div>
 
         {/* ── Pihak Serah Terima ── */}

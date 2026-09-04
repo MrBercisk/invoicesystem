@@ -14,10 +14,12 @@ import {
   MapPin,
   CreditCard,
   FileCheck,
+  Briefcase,
 } from 'lucide-react';
 
 import { companiesApi } from '../../lib/api';
 import type { Company, CompanyFormValues } from '../../types';
+import { availableBusinessTypes } from '../../lib/itemLabels.generated';
 
 import {
   ImageUploadField,
@@ -31,6 +33,25 @@ import {
 interface CompanyModalProps {
   company?: Company;
   onClose: () => void;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Business type labels                                                       */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Label yang ditampilkan ke user untuk tiap business_type. Key harus sama
+ * persis dengan key di App\Support\ItemLabels.php. Kalau nambah business_type
+ * baru di backend, tambahkan juga label human-friendly-nya di sini.
+ */
+const BUSINESS_TYPE_LABELS: Record<string, string> = {
+  general: 'Umum',
+  web_dev: 'Jasa Web Development',
+  kue: 'Kue / Bakery',
+};
+
+function businessTypeLabel(value: string): string {
+  return BUSINESS_TYPE_LABELS[value] ?? value;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -68,6 +89,7 @@ function buildCompanyFormData(
 
   const fields: Array<keyof CompanyFormValues> = [
     'name',
+    'business_type',
     'email',
     'phone',
     'address',
@@ -137,6 +159,7 @@ export function CompanyModal({
   } = useForm<CompanyFormValues>({
     defaultValues: {
       name: company?.name ?? '',
+      business_type: company?.business_type ?? 'general',
       email: company?.email ?? '',
       phone: company?.phone ?? '',
       address: company?.address ?? '',
@@ -333,6 +356,30 @@ export function CompanyModal({
                     placeholder="Moracraft Studio"
                     className={inputClass}
                   />
+                </div>
+
+                {/* Business Type */}
+                <div>
+                  <label className={`${labelClass} flex items-center gap-1`}>
+                    <Briefcase size={10} />
+                    Jenis Bisnis
+                  </label>
+
+                  <select
+                    {...register('business_type')}
+                    className={inputClass}
+                  >
+                    {availableBusinessTypes().map((value) => (
+                      <option key={value} value={value}>
+                        {businessTypeLabel(value)}
+                      </option>
+                    ))}
+                  </select>
+
+                  <p className="mt-1 text-[10px] text-slate-400">
+                    Menentukan istilah yang dipakai pada dokumen serah terima
+                    (mis. "Daftar Fitur" vs "Daftar Produk").
+                  </p>
                 </div>
 
                 {/* Email & Phone */}

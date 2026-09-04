@@ -1,6 +1,8 @@
 import type { ImageValue } from './image';
+
 export interface CompanyFormValues {
   name: string;
+  business_type: string;
   email: string;
   phone: string;
   address: string;

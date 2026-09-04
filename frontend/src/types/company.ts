@@ -1,6 +1,15 @@
 export interface Company {
   id: number;
   name: string;
+
+  /**
+   * Menentukan kamus label mana yang dipakai untuk item dokumen serah
+   * terima — lihat frontend/src/lib/itemLabels.generated.ts (di-generate
+   * dari App\Support\ItemLabels.php, jangan diedit manual).
+   * Default backend: 'general'.
+   */
+  business_type: string;
+
   email?: string;
   phone?: string;
   address?: string;

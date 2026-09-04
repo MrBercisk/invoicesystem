@@ -28,6 +28,20 @@ class HandoverDocumentController extends Controller
         if ($request->invoice_id) {
             $query->where('invoice_id', $request->invoice_id);
         }
+
+        // filter dokumen yang masih dalam masa garansi
+        if ($request->boolean('under_warranty')) {
+            $query->whereNotNull('warranty_days')
+                ->whereRaw('DATE_ADD(document_date, INTERVAL warranty_days DAY) >= ?', [now()->toDateString()]);
+        }
+        // filter dokumen yang garansinya sudah habis
+        if ($request->has('under_warranty') && !$request->boolean('under_warranty')) {
+            $query->where(function ($q) {
+                $q->whereNull('warranty_days')
+                ->orWhereRaw('DATE_ADD(document_date, INTERVAL warranty_days DAY) < ?', [now()->toDateString()]);
+            });
+        }
+
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {

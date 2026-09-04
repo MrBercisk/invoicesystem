@@ -9,8 +9,10 @@ export type {
   HandoverDocument,
   HandoverDocumentItem,
   HandoverStatus,
-  HandoverItemType
+  HandoverItemType,
+  HandoverItemMetadata
 } from './handover';
+
 
 export type {
   Invoice,

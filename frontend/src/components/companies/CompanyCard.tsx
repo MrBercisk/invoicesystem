@@ -7,6 +7,7 @@ import {
   CreditCard,
   MapPin,
   CheckCircle2,
+  Briefcase,
 } from 'lucide-react';
 
 import type { Company } from '../../types';
@@ -15,6 +16,21 @@ interface CompanyCardProps {
   company: Company;
   onEdit: () => void;
   onDelete: () => void;
+}
+
+/*
+ * Label yang ditampilkan ke user untuk tiap business_type. Key harus sama
+ * persis dengan key di App\Support\ItemLabels.php dan dengan map yang sama
+ * di CompanyModal.tsx.
+ */
+const BUSINESS_TYPE_LABELS: Record<string, string> = {
+  general: 'Umum',
+  web_dev: 'Web Dev',
+  kue: 'Kue / Bakery',
+};
+
+function businessTypeLabel(value: string): string {
+  return BUSINESS_TYPE_LABELS[value] ?? value;
 }
 
 export function CompanyCard({
@@ -96,6 +112,11 @@ export function CompanyCard({
 
         {/* Badges */}
         <div className="flex flex-wrap items-center gap-1.5 px-4 pb-3 sm:px-5 text-[10px]">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-md">
+            <Briefcase size={10} />
+            {businessTypeLabel(company.business_type)}
+          </span>
+
           {company.logo && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md">
               <CheckCircle2 size={10} />

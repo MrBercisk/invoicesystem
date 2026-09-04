@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Printer, Download, CheckCircle, XCircle } from 'lucide-react';
-import type { HandoverDocument, HandoverStatus } from '../../types';
+import { Printer, Download, CheckCircle, XCircle, ShieldCheck, ShieldOff } from 'lucide-react';
+import type { HandoverDocument, HandoverDocumentItem, HandoverStatus } from '../../types';
 import { handoverApi } from '../../lib/api';
 import { type Template, getTemplateStyles } from './handoverTemplateStyles';
 
@@ -15,6 +15,14 @@ const STATUS_MAP: Record<HandoverStatus, { label: string; dot: string; text: str
   cancelled: { label: 'Dibatalkan', dot: 'bg-red-600',     text: 'text-red-700',    bg: 'bg-red-50 border-red-200' },
 };
 
+function metaText(metadata?: HandoverDocumentItem['metadata']): string {
+  if (!metadata) return '';
+  return Object.entries(metadata)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => `${k}: ${v}`)
+    .join(' • ');
+}
+
 export function HandoverPreview({ document: doc, onStatusChange }: Props) {
   const template: Template = 'minimalis';
   const [downloadingPdf, setDownloadingPdf] = useState(false);
@@ -25,30 +33,54 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
   const asetItems = doc.items.filter((i) => i.type === 'barang');
   const fiturItems = doc.items.filter((i) => i.type === 'pekerjaan');
 
+  const asetSectionLabel = asetItems[0]?.section_label || 'Daftar Aset/Akses';
+  const fiturSectionLabel = fiturItems[0]?.section_label || 'Daftar Fitur';
+  const asetNameLabel = asetItems[0]?.name_column_label || 'Nama Aset/Akses';
+  const fiturNameLabel = fiturItems[0]?.name_column_label || 'Nama Fitur';
+
+  // TAMBAHAN: label & visibilitas kolom kondisi, dinamis sesuai business_type.
+  // has_condition & condition_label sama untuk semua item barang di satu
+  // dokumen (karena satu dokumen = satu company = satu business_type),
+  // jadi cukup ambil dari item pertama.
+  const asetHasCondition = asetItems[0]?.has_condition ?? true;
+  const asetConditionLabel = asetItems[0]?.condition_label || 'Kondisi';
+
+  const hasWarranty = Boolean(doc.warranty_days);
+
   const buildHandoverHTML = (t: Template): string => {
     const styles = getTemplateStyles(t);
     const logoHtml = doc.company.logo
       ? `<img src="${doc.company.logo}" class="company-logo" alt="${doc.company.name}" />`
       : '';
 
-    const asetRows = asetItems.map((item, idx) => `
+    const asetRows = asetItems.map((item, idx) => {
+      const extra = metaText(item.metadata);
+      const catatan = [item.notes, extra].filter(Boolean).join(' • ');
+      // TAMBAHAN: kolom kondisi hanya ditulis kalau asetHasCondition true
+      const conditionCell = asetHasCondition ? `<td>${item.condition || '-'}</td>` : '';
+      return `
       <tr>
         <td>${idx + 1}</td>
         <td>${item.name}${item.description ? `<div class="td-note">${item.description}</div>` : ''}</td>
         <td class="td-right">${item.quantity}</td>
         <td>${item.unit || '-'}</td>
-        <td>${item.condition || '-'}</td>
-        <td>${item.notes || '-'}</td>
+        ${conditionCell}
+        <td>${catatan || '-'}</td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
 
-    const fiturRows = fiturItems.map((item, idx) => `
+    const fiturRows = fiturItems.map((item, idx) => {
+      const extra = metaText(item.metadata);
+      const deskripsi = [item.description, extra].filter(Boolean).join(' • ');
+      return `
       <tr>
         <td>${idx + 1}</td>
         <td>${item.name}</td>
-        <td>${item.description || '-'}</td>
+        <td>${deskripsi || '-'}</td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
 
     const signatureHtml = doc.company.signature
       ? `<img src="${doc.company.signature}" class="signature" alt="Signature" />`
@@ -56,6 +88,16 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
 
     const stampHtml = doc.company.stamp
       ? `<img src="${doc.company.stamp}" class="stamp" alt="Stamp" />`
+      : '';
+
+    const warrantyHtml = hasWarranty
+      ? `<div class="warranty-box${doc.is_under_warranty ? '' : ' expired'}">
+          <span>
+            Barang/pekerjaan yang diserahkan mendapat garansi selama <strong>${doc.warranty_days} hari</strong>
+            sejak tanggal serah terima${doc.warranty_expires_at ? ` (berakhir pada ${formatDate(doc.warranty_expires_at)})` : ''}.
+            ${doc.is_under_warranty === false ? ' Status garansi saat ini: <strong>sudah habis</strong>.' : ''}
+          </span>
+        </div>`
       : '';
 
     return `
@@ -98,15 +140,15 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
           </p>
 
           ${asetItems.length > 0 ? `
-            <h4 style="font-size:11px; font-weight:800; margin-bottom:8px;">A. Daftar Aset/Akses</h4>
+            <h4 style="font-size:11px; font-weight:800; margin-bottom:8px;">A. ${asetSectionLabel}</h4>
             <table style="margin-bottom:20px;">
               <thead>
                 <tr>
                   <th style="width:30px">No</th>
-                  <th style="text-align:left">Nama Aset/Akses</th>
+                  <th style="text-align:left">${asetNameLabel}</th>
                   <th style="width:50px">Qty</th>
                   <th style="width:60px">Satuan</th>
-                  <th style="width:70px">Kondisi</th>
+                  ${asetHasCondition ? `<th style="width:70px">${asetConditionLabel}</th>` : ''}
                   <th>Catatan</th>
                 </tr>
               </thead>
@@ -115,12 +157,12 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
           ` : ''}
 
           ${fiturItems.length > 0 ? `
-            <h4 style="font-size:11px; font-weight:800; margin-bottom:8px;">B. Daftar Fitur</h4>
+            <h4 style="font-size:11px; font-weight:800; margin-bottom:8px;">B. ${fiturSectionLabel}</h4>
             <table style="margin-bottom:20px;">
               <thead>
                 <tr>
                   <th style="width:30px">No</th>
-                  <th style="text-align:left">Nama Fitur</th>
+                  <th style="text-align:left">${fiturNameLabel}</th>
                   <th style="text-align:left">Deskripsi</th>
                 </tr>
               </thead>
@@ -128,10 +170,10 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
             </table>
           ` : ''}
 
+          ${warrantyHtml}
+
           ${doc.notes ? `<p style="font-size:10.5px; margin-bottom:16px;"><strong>Catatan:</strong> ${doc.notes}</p>` : ''}
           ${doc.terms ? `<p style="font-size:10.5px; margin-bottom:24px; color:#52525b;">${doc.terms}</p>` : ''}
-
-          
 
             <table class="sign-wrap">
               <tr>
@@ -213,6 +255,20 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
             {s.label}
           </span>
 
+          {hasWarranty && (
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md border ${
+                doc.is_under_warranty
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-zinc-100 border-zinc-200 text-zinc-500'
+              }`}
+            >
+              {doc.is_under_warranty ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}
+              {doc.is_under_warranty ? 'Dalam Garansi' : 'Garansi Habis'}
+              {doc.warranty_expires_at && ` · s/d ${formatDate(doc.warranty_expires_at)}`}
+            </span>
+          )}
+
           <div className="h-4 w-px bg-zinc-200 hidden sm:block" />
 
             <span className="text-xs text-zinc-500 font-medium">
@@ -278,23 +334,39 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
 
         {asetItems.length > 0 && (
           <div className="mb-5">
-            <h4 className="text-xs font-bold mb-2">A. Daftar Aset/Akses</h4>
+            <h4 className="text-xs font-bold mb-2">A. {asetSectionLabel}</h4>
             <table className="w-full text-[11px] border-collapse">
               <thead>
                 <tr className="border-b border-zinc-200 text-zinc-500">
-                  <th className="text-left py-1.5">Nama</th>
+                  <th className="text-left py-1.5">{asetNameLabel}</th>
                   <th className="text-right py-1.5">Qty</th>
-                  <th className="text-left py-1.5 pl-2">Kondisi</th>
+                  {asetHasCondition && (
+                    <th className="text-left py-1.5 pl-2">{asetConditionLabel}</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {asetItems.map((item, idx) => (
-                  <tr key={idx} className="border-b border-zinc-100">
-                    <td className="py-1.5">{item.name}</td>
-                    <td className="py-1.5 text-right">{item.quantity} {item.unit}</td>
-                    <td className="py-1.5 pl-2">{item.condition}</td>
-                  </tr>
-                ))}
+                {asetItems.map((item, idx) => {
+                  const extra = metaText(item.metadata);
+                  return (
+                    <tr key={idx} className="border-b border-zinc-100 align-top">
+                      <td className="py-1.5">
+                        {item.name}
+                        {item.description && (
+                          <div className="text-[9px] text-zinc-400">{item.description}</div>
+                        )}
+                      </td>
+                      <td className="py-1.5 text-right">{item.quantity} {item.unit}</td>
+                      {asetHasCondition && (
+                        <td className="py-1.5 pl-2">
+                          {item.condition}
+                          {item.notes && <div className="text-[9px] text-zinc-400">{item.notes}</div>}
+                          {extra && <div className="text-[9px] text-zinc-400">{extra}</div>}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -302,16 +374,29 @@ export function HandoverPreview({ document: doc, onStatusChange }: Props) {
 
         {fiturItems.length > 0 && (
           <div>
-            <h4 className="text-xs font-bold mb-2">B. Daftar Fitur</h4>
+            <h4 className="text-xs font-bold mb-2">B. {fiturSectionLabel}</h4>
             <ul className="text-[11px] space-y-1 list-disc list-inside text-zinc-700">
-              {fiturItems.map((item, idx) => (
-                <li key={idx}>
-                  <strong>{item.name}</strong>{item.description ? ` — ${item.description}` : ''}
-                </li>
-              ))}
+              {fiturItems.map((item, idx) => {
+                const extra = metaText(item.metadata);
+                return (
+                  <li key={idx}>
+                    <strong>{item.name}</strong>{item.description ? ` — ${item.description}` : ''}
+                    {extra && <div className="text-[9px] text-zinc-400 pl-4">{extra}</div>}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
+
+        {hasWarranty && (
+          <p className="text-[10.5px] text-zinc-600 mt-5">
+            Barang/pekerjaan yang diserahkan mendapat garansi selama <strong>{doc.warranty_days} hari</strong> sejak
+            tanggal serah terima
+            {doc.warranty_expires_at ? ` (berakhir pada ${formatDate(doc.warranty_expires_at)})` : ''}.
+          </p>
+        )}
+
         <div className="grid grid-cols-2 gap-8 mt-16">
 
           {/* Yang Menyerahkan */}

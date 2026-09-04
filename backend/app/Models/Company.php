@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ItemLabels;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +15,7 @@ class Company extends Model
 
     protected $fillable = [
         'name',
+        'business_type',
         'email',
         'phone',
         'address',
@@ -36,6 +38,11 @@ class Company extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function handoverDocuments(): HasMany
+    {
+        return $this->hasMany(HandoverDocument::class);
     }
 
     protected function logo(): Attribute
@@ -62,6 +69,17 @@ class Company extends Model
             get: fn ($value) => $value
                 ? Storage::disk('public')->url($value)
                 : null,
+        );
+    }
+
+    /**
+     * business_type yang aman ditampilkan, fallback ke default kalau
+     * kosong/null (mis. data lama sebelum kolom ini ada).
+     */
+    protected function businessType(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ?: ItemLabels::DEFAULT_TYPE,
         );
     }
 }

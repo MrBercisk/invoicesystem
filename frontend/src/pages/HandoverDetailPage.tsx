@@ -10,6 +10,7 @@ export function HandoverDetailPage() {
   const navigate = useNavigate();
   const [doc, setDoc] = useState<HandoverDocument | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     handoverApi.getOne(Number(id)).then((data) => {
@@ -20,8 +21,16 @@ export function HandoverDetailPage() {
 
   const handleStatusChange = async (status: HandoverStatus) => {
     if (!doc) return;
-    const updated = await handoverApi.updateStatus(doc.id, status);
-    setDoc(updated);
+    try {
+      setUpdatingStatus(true);
+      const updated = await handoverApi.updateStatus(doc.id, status);
+      setDoc(updated);
+    } catch (err) {
+      console.error('Gagal mengubah status dokumen:', err);
+      alert('Gagal mengubah status dokumen. Silakan coba lagi.');
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   if (loading) return <div className="p-6 text-sm text-zinc-500">Memuat dokumen...</div>;
@@ -51,7 +60,10 @@ export function HandoverDetailPage() {
         </button>
       </div>
 
-      <HandoverPreview document={doc} onStatusChange={handleStatusChange} />
+      <HandoverPreview
+        document={doc}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }

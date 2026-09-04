@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Company;
 
+use App\Support\ItemLabels;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCompanyRequest extends FormRequest
 {
@@ -15,6 +17,7 @@ class StoreCompanyRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'business_type' => ['nullable', 'string', Rule::in(ItemLabels::available())],
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
@@ -48,6 +51,7 @@ class StoreCompanyRequest extends FormRequest
         return [
             'name.required' => 'Nama perusahaan wajib diisi.',
             'name.max' => 'Nama perusahaan maksimal 255 karakter.',
+            'business_type.in' => 'Jenis bisnis tidak valid.',
             'email.email' => 'Format email tidak valid.',
             'website.url' => 'Format website tidak valid.',
 

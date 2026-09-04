@@ -125,6 +125,34 @@ export const getTemplateStyles = (
       color: #71717a;
     }
 
+     .warranty-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 8px 10px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      font-size: 9.5px;
+      color: #1e3a8a;
+      line-height: 1.5;
+    }
+
+    .warranty-box strong {
+      color: #1e3a8a;
+    }
+
+    .warranty-box.expired {
+      background: #fafafa;
+      border-color: #e4e4e7;
+      color: #52525b;
+    }
+
+    .warranty-box.expired strong {
+      color: #3f3f46;
+    }
+
     h4 {
       color: #18181b;
     }
