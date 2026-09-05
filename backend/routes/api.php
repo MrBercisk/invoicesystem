@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\HandoverDocumentController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReceiptController;
+
 Route::prefix('v1')->group(function () {
 
     Route::post('login', [AuthController::class, 'login']);
@@ -48,5 +50,23 @@ Route::prefix('v1')->group(function () {
         );
 
         Route::apiResource('handover-documents', HandoverDocumentController::class);
+
+
+        Route::post(
+            'invoices/{invoice}/receipt',
+            [ReceiptController::class, 'storeFromInvoice']
+        );
+
+        Route::patch(
+            'receipts/{receipt}/void',
+            [ReceiptController::class, 'void']
+        );
+
+        Route::get(
+            'receipts/{receipt}/pdf-url',
+            [ReceiptController::class, 'pdfUrl']
+        );
+
+        Route::apiResource('receipts', ReceiptController::class);
     });
 });

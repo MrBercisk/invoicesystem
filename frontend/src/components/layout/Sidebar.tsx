@@ -8,12 +8,14 @@ import {
   LayoutDashboard,
   Plus,
   ReceiptText,
+  Receipt,
   ClipboardCheck,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Faktur / Invoice', href: '/invoices', icon: FileText },
+  { name: 'Kwitansi', href: '/receipts', icon: Receipt },
   {
     name: 'Dokumen Serah Terima',
     href: '/handover-documents',

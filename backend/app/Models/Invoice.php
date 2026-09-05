@@ -156,5 +156,8 @@ class Invoice extends Model {
     {
         return $this->pdfLink($template, $expiresInDays)['url'];
     }
+    public function receipts(): HasMany {
+        return $this->hasMany(Receipt::class);
+    }
 
 }

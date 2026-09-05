@@ -82,4 +82,9 @@ class Company extends Model
             get: fn ($value) => $value ?: ItemLabels::DEFAULT_TYPE,
         );
     }
+
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(Receipt::class);
+    }
 }

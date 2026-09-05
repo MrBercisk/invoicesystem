@@ -10,6 +10,7 @@ import {
   Building2,
   Users,
   FolderKanban,
+  Receipt,
 } from 'lucide-react';
 import { invoicesApi } from '../lib/api';
 import { InvoicePreview } from '../components/invoices/InvoicePreview';
@@ -127,13 +128,14 @@ export function InvoiceDetailPage() {
             </button>
           )}
 
-          {/* <button
-            onClick={() => setWaModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg transition-colors shadow-xs cursor-pointer"
-            title="Kirim Ringkasan Faktur via WhatsApp (1-Klik)"
-          >
-            <MessageCircle size={13} className="stroke-[2.5]" /> Kirim WA
-          </button> */}
+          {invoice.status === 'paid' && (
+            <Link
+              to={`/invoices/${invoice.id}/receipt/new`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg shadow-xs transition-colors"
+            >
+              <Receipt size={13} /> Buat Kwitansi
+            </Link>
+          )}
 
           <Link
             to={`/invoices/${invoice.id}/edit`}

@@ -14,6 +14,9 @@ import { ProductsPage } from './pages/ProductsPage';
 import { HandoverListPage } from './pages/HandoverListPage';
 import { HandoverFormPage } from './pages/HandoverFormPage';
 import { HandoverDetailPage } from './pages/HandoverDetailPage';
+import { ReceiptListPage } from './pages/ReceiptListPage';
+import { ReceiptFormPage } from './pages/ReceiptFormPage';
+import { ReceiptDetailPage } from './pages/ReceiptDetailPage';
 
 
 const queryClient = new QueryClient({
@@ -47,6 +50,11 @@ export function App() {
                 <Route path="/handover-documents/new" element={<HandoverFormPage />} />
                 <Route path="/handover-documents/:id" element={<HandoverDetailPage />} />
                 <Route path="/handover-documents/:id/edit" element={<HandoverFormPage />} />
+                <Route path="/receipts" element={<ReceiptListPage />} />
+                <Route path="/receipts/new" element={<ReceiptFormPage />} />
+                <Route path="/receipts/:id" element={<ReceiptDetailPage />} />
+                <Route path="/receipts/:id/edit" element={<ReceiptFormPage />} />
+                <Route path="/invoices/:invoiceId/receipt/new" element={<ReceiptFormPage />} />
               </Route>
             </Route>
           </Routes>

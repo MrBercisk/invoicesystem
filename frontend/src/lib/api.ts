@@ -10,7 +10,11 @@ import type {
   Product,
   HandoverDocument,
   HandoverDocumentItem, 
-  HandoverStatus
+  HandoverStatus,
+  Receipt,
+  ReceiptStatus,
+  ReceiptFormData,
+  ReceiptFromInvoiceFormData,
 } from '../types';
 
 export interface InvoiceProject {
@@ -361,6 +365,64 @@ export const handoverApi = {
     const res = await api.get(`/handover-documents/${id}/pdf-url`, {
       params: { template },
     });
+
+    return {
+      url: res.data.url,
+      expiresAt: res.data.expires_at,
+    };
+  },
+};
+
+export const receiptsApi = {
+  getAll: (
+    params?: {
+      status?: ReceiptStatus;
+      client_id?: number;
+      company_id?: number;
+      invoice_id?: number;
+      search?: string;
+      page?: number;
+    }
+  ) =>
+    api
+      .get<PaginatedResponse<Receipt>>('/receipts', { params })
+      .then((r) => r.data),
+
+  getOne: (id: number) =>
+    api
+      .get<Receipt>(`/receipts/${id}`)
+      .then((r) => r.data),
+
+  create: (data: ReceiptFormData) =>
+    api
+      .post<Receipt>('/receipts', data)
+      .then((r) => r.data),
+
+  createFromInvoice: (
+    invoiceId: number,
+    data: ReceiptFromInvoiceFormData
+  ) =>
+    api
+      .post<Receipt>(`/invoices/${invoiceId}/receipt`, data)
+      .then((r) => r.data),
+
+  update: (id: number, data: Partial<ReceiptFormData>) =>
+    api
+      .put<Receipt>(`/receipts/${id}`, data)
+      .then((r) => r.data),
+
+  void: (id: number) =>
+    api
+      .patch<Receipt>(`/receipts/${id}/void`, {})
+      .then((r) => r.data),
+
+  delete: (id: number) =>
+    api.delete(`/receipts/${id}`),
+
+  getPdfUrl: async (
+    id: number
+  ): Promise<{ url: string; expiresAt: string }> => {
+    const res = await api.get(`/receipts/${id}/pdf-url`);
 
     return {
       url: res.data.url,
